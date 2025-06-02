@@ -50,7 +50,7 @@ public class PredictionService {
 
     private PredictionDTO mapPredictionEntityToDTO(PredictionEntity prediction) {
         return PredictionDTO.builder()
-                .predictionId(prediction.getId())
+                .id(prediction.getId())
                 .createdDate(formatDateTime(prediction.getCreatedDate()))
                 .updatedDate(formatDateTime(prediction.getUpdatedDate()))
                 .creatorUserId(prediction.getCreatorUserId())

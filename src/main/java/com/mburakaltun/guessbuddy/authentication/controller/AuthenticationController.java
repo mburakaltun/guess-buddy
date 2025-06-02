@@ -1,9 +1,9 @@
 package com.mburakaltun.guessbuddy.authentication.controller;
 
-import com.mburakaltun.guessbuddy.authentication.model.request.SignInUserRequest;
-import com.mburakaltun.guessbuddy.authentication.model.request.SignUpUserRequest;
-import com.mburakaltun.guessbuddy.authentication.model.response.SignInUserResponse;
-import com.mburakaltun.guessbuddy.authentication.model.response.SignUpUserResponse;
+import com.mburakaltun.guessbuddy.authentication.model.request.RequestSignInUser;
+import com.mburakaltun.guessbuddy.authentication.model.request.RequestSignUpUser;
+import com.mburakaltun.guessbuddy.authentication.model.response.ResponseSignInUser;
+import com.mburakaltun.guessbuddy.authentication.model.response.ResponseSignUpUser;
 import com.mburakaltun.guessbuddy.authentication.service.AuthenticationService;
 import com.mburakaltun.guessbuddy.common.controller.BaseController;
 import com.mburakaltun.guessbuddy.common.exception.AppException;
@@ -25,14 +25,14 @@ public class AuthenticationController extends BaseController {
     private final AuthenticationService authenticationService;
 
     @PostMapping("/signUp")
-    public ResponseEntity<ApiResponse<SignUpUserResponse>> signUp(@Valid @RequestBody SignUpUserRequest signUpUserRequest) throws AppException {
-        SignUpUserResponse response = authenticationService.signUpUser(signUpUserRequest);
+    public ResponseEntity<ApiResponse<ResponseSignUpUser>> signUp(@Valid @RequestBody RequestSignUpUser requestSignUpUser) throws AppException {
+        ResponseSignUpUser response = authenticationService.signUpUser(requestSignUpUser);
         return new ResponseEntity<>(respond(response), HttpStatus.CREATED);
     }
 
     @PostMapping("/signIn")
-    public ResponseEntity<ApiResponse<SignInUserResponse>> signIn(@Valid @RequestBody SignInUserRequest signInUserRequest) throws AppException {
-        SignInUserResponse response = authenticationService.signInUser(signInUserRequest);
+    public ResponseEntity<ApiResponse<ResponseSignInUser>> signIn(@Valid @RequestBody RequestSignInUser requestSignInUser) throws AppException {
+        ResponseSignInUser response = authenticationService.signInUser(requestSignInUser);
         return new ResponseEntity<>(respond(response), HttpStatus.OK);
     }
 }

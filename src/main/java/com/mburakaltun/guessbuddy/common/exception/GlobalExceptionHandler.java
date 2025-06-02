@@ -1,5 +1,6 @@
 package com.mburakaltun.guessbuddy.common.exception;
 
+import com.mburakaltun.guessbuddy.common.model.response.ApiExceptionResponse;
 import com.mburakaltun.guessbuddy.common.model.response.ApiResponse;
 import com.mburakaltun.guessbuddy.common.util.ResponseUtility;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -21,49 +22,49 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<Void>> handleException(Exception exception) {
+    public ResponseEntity<ApiExceptionResponse> handleException(Exception exception) {
         log.error(exception.getMessage(), exception);
-        ApiResponse<Void> response = ResponseUtility.error("An error occurred!");
+        ApiExceptionResponse response = ResponseUtility.error("An error occurred!");
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<Void>> handleMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
+    public ResponseEntity<ApiExceptionResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
         log.error(exception.getMessage(), exception);
         List<String> errorMessages = exception.getBindingResult()
                 .getFieldErrors()
                 .stream()
                 .map(FieldError::getDefaultMessage)
                 .collect(Collectors.toList());
-        ApiResponse<Void> response = ResponseUtility.error(String.join(", ", errorMessages));
+        ApiExceptionResponse response = ResponseUtility.error(String.join(", ", errorMessages));
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(LoginException.class)
-    public ResponseEntity<ApiResponse<Void>> handleLoginException(LoginException exception) {
+    public ResponseEntity<ApiExceptionResponse> handleLoginException(LoginException exception) {
         log.error(exception.getMessage(), exception);
-        ApiResponse<Void> response = ResponseUtility.error(exception.getMessage());
+        ApiExceptionResponse response = ResponseUtility.error(exception.getMessage());
         return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ApiResponse<Void>> handleIllegalArgumentException(IllegalArgumentException exception) {
+    public ResponseEntity<ApiExceptionResponse> handleIllegalArgumentException(IllegalArgumentException exception) {
         log.error(exception.getMessage(), exception);
-        ApiResponse<Void> response = ResponseUtility.error(exception.getMessage());
+        ApiExceptionResponse response = ResponseUtility.error(exception.getMessage());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(AppException.class)
-    public ResponseEntity<ApiResponse<Void>> handleAppException(AppException exception) {
+    public ResponseEntity<ApiExceptionResponse> handleAppException(AppException exception) {
         log.error(exception.getMessage(), exception);
-        ApiResponse<Void> response = ResponseUtility.error(exception.getMessage(), exception.getCode());
+        ApiExceptionResponse response = ResponseUtility.error(exception.getMessage(), exception.getCode());
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(AuthorizationDeniedException.class)
-    public ResponseEntity<ApiResponse<Void>> handleAuthorizationDeniedException(AuthorizationDeniedException exception) {
+    public ResponseEntity<ApiExceptionResponse> handleAuthorizationDeniedException(AuthorizationDeniedException exception) {
         log.error(exception.getMessage(), exception);
-        ApiResponse<Void> response = ResponseUtility.error(exception.getMessage());
+        ApiExceptionResponse response = ResponseUtility.error(exception.getMessage());
         return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
     }
 }

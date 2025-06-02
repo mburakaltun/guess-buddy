@@ -12,11 +12,15 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SignUpUserRequest {
+public class RequestSignUpUser {
 
     @NotBlank(message = "Email must not be null or empty")
     @Email(message = "Invalid email format")
     private String email;
+
+    @NotBlank(message = "Username must not be null or empty")
+    @Size(min = 3, max = 31, message = "Username must be between 3 and 31 characters long")
+    private String username;
 
     @NotBlank(message = "Password must not be null or empty")
     @Size(min = 8, message = "Password must be at least 8 characters long")

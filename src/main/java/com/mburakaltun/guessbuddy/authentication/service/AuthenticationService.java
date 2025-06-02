@@ -2,10 +2,10 @@ package com.mburakaltun.guessbuddy.authentication.service;
 
 import com.mburakaltun.guessbuddy.authentication.model.entity.UserEntity;
 import com.mburakaltun.guessbuddy.authentication.model.enums.AuthenticationErrorCode;
-import com.mburakaltun.guessbuddy.authentication.model.request.SignInUserRequest;
-import com.mburakaltun.guessbuddy.authentication.model.request.SignUpUserRequest;
-import com.mburakaltun.guessbuddy.authentication.model.response.SignInUserResponse;
-import com.mburakaltun.guessbuddy.authentication.model.response.SignUpUserResponse;
+import com.mburakaltun.guessbuddy.authentication.model.request.RequestSignInUser;
+import com.mburakaltun.guessbuddy.authentication.model.request.RequestSignUpUser;
+import com.mburakaltun.guessbuddy.authentication.model.response.ResponseSignInUser;
+import com.mburakaltun.guessbuddy.authentication.model.response.ResponseSignUpUser;
 import com.mburakaltun.guessbuddy.authentication.repository.UserRepository;
 import com.mburakaltun.guessbuddy.common.model.enums.AuthorizationRole;
 import com.mburakaltun.guessbuddy.common.exception.AppException;
@@ -28,40 +28,44 @@ public class AuthenticationService {
     private final UserRepository userRepository;
     private final AuthenticationManager authenticationManager;
 
-    public SignUpUserResponse signUpUser(SignUpUserRequest signUpUserRequest) throws AppException {
-        String email = signUpUserRequest.getEmail();
-        String password = signUpUserRequest.getPassword();
+    public ResponseSignUpUser signUpUser(RequestSignUpUser requestSignUpUser) throws AppException {
+        String email = requestSignUpUser.getEmail();
+        String password = requestSignUpUser.getPassword();
+        String username = requestSignUpUser.getUsername();
 
         validateEmail(email);
-        validatePasswordMatch(signUpUserRequest);
+        validateUsername(username);
+        validatePasswordMatch(requestSignUpUser);
 
         String encodedPassword = passwordEncoder.encode(password);
 
         UserEntity userEntity = new UserEntity();
         userEntity.setEmail(email);
+        userEntity.setUsername(username);
         userEntity.setEncodedPassword(encodedPassword);
         userEntity.setRole(AuthorizationRole.ROLE_STANDARD_USER);
         userRepository.save(userEntity);
 
         log.info("User signed up successfully with email: {}", email);
-        return SignUpUserResponse.builder()
+        return ResponseSignUpUser.builder()
                 .id(userEntity.getId())
                 .build();
     }
 
-    public SignInUserResponse signInUser(SignInUserRequest signInUserRequest) throws AppException {
-        String email = signInUserRequest.getEmail();
-        String password = signInUserRequest.getPassword();
+    public ResponseSignInUser signInUser(RequestSignInUser requestSignInUser) throws AppException {
+        String email = requestSignInUser.getEmail();
+        String password = requestSignInUser.getPassword();
 
-        validateUserCredentials(email, password);
+        Long userId = validateUserCredentials(email, password);
         Authentication authentication = authenticateUser(email, password);
 
         AuthorizationRole role = generateRole(authentication);
         String authenticationToken = JwtUtility.generateToken(email, role);
 
         log.info("User signed in successfully with email: {}", email);
-        return SignInUserResponse.builder()
+        return ResponseSignInUser.builder()
                 .authenticationToken(authenticationToken)
+                .userId(String.valueOf(userId))
                 .build();
     }
 
@@ -86,7 +90,16 @@ public class AuthenticationService {
         }
     }
 
-    private void validateUserCredentials(String email, String password) throws AppException {
+
+    private void validateUsername(String username) throws AppException {
+        boolean isUsernameExist = userRepository.existsByUsername(username);
+        if (isUsernameExist) {
+            log.error("Username already exists: {}", username);
+            throw new AppException(AuthenticationErrorCode.USERNAME_ALREADY_EXISTS);
+        }
+    }
+
+    private Long validateUserCredentials(String email, String password) throws AppException {
         UserEntity userEntity = userRepository.findByEmail(email).orElseThrow(() -> {
             log.error("Incorrect email or password: {}", email);
             return new AppException(AuthenticationErrorCode.INVALID_CREDENTIALS);
@@ -98,11 +111,12 @@ public class AuthenticationService {
             log.error("Incorrect email or password: {}", email);
             throw new AppException(AuthenticationErrorCode.INVALID_CREDENTIALS);
         }
+        return userEntity.getId();
     }
 
-    private void validatePasswordMatch(SignUpUserRequest signUpUserRequest) throws AppException {
-        String password = signUpUserRequest.getPassword();
-        String confirmPassword = signUpUserRequest.getConfirmPassword();
+    private void validatePasswordMatch(RequestSignUpUser requestSignUpUser) throws AppException {
+        String password = requestSignUpUser.getPassword();
+        String confirmPassword = requestSignUpUser.getConfirmPassword();
         if (!password.equals(confirmPassword)) {
             throw new AppException(AuthenticationErrorCode.PASSWORD_MISMATCH);
         }

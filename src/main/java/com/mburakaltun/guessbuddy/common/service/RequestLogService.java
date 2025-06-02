@@ -21,6 +21,7 @@ public class RequestLogService {
         requestLogEntity.setRequestUrl(createRequestLogRequest.getRequestUrl());
         requestLogEntity.setRequestMethod(createRequestLogRequest.getRequestMethod());
         requestLogEntity.setRequestIp(createRequestLogRequest.getRequestIp());
+        requestLogEntity.setRequestHeaders(createRequestLogRequest.getRequestHeaders());
         requestLogEntity.setRequestPayload(createRequestLogRequest.getRequestPayload());
         requestLogEntity.setResponsePayload(createRequestLogRequest.getResponsePayload());
         requestLogEntity.setResponseStatus(createRequestLogRequest.getResponseStatus());

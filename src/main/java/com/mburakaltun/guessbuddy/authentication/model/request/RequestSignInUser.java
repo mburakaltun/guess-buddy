@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SignInUserRequest {
+public class RequestSignInUser {
 
     @NotBlank(message = "Email must not be null or empty")
     @Email(message = "Invalid email format")

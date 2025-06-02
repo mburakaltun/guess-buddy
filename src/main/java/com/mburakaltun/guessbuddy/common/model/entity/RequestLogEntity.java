@@ -17,6 +17,9 @@ public class RequestLogEntity extends BaseEntity {
     private String requestUrl;
 
     @Column(columnDefinition = "TEXT")
+    private String requestHeaders;
+
+    @Column(columnDefinition = "TEXT")
     private String requestPayload;
 
     @Column(columnDefinition = "TEXT")

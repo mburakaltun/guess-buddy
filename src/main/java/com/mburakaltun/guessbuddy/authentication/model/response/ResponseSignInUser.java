@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SignUpUserResponse {
-    private Long id;
+public class ResponseSignInUser {
+    private String authenticationToken;
+    private String userId;
 }

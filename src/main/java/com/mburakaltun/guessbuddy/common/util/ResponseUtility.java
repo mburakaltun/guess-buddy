@@ -1,5 +1,6 @@
 package com.mburakaltun.guessbuddy.common.util;
 
+import com.mburakaltun.guessbuddy.common.model.response.ApiExceptionResponse;
 import com.mburakaltun.guessbuddy.common.model.response.ApiResponse;
 import lombok.experimental.UtilityClass;
 
@@ -26,24 +27,16 @@ public class ResponseUtility {
                 .build();
     }
 
-    public <T> ApiResponse<T> error(String message) {
-        return ApiResponse.<T>builder()
-                .success(false)
-                .message(message)
+    public <T> ApiExceptionResponse error(String message) {
+        return ApiExceptionResponse.builder()
+                .errorMessage(message)
                 .build();
     }
 
-    public <T> ApiResponse<T> error(String message, int errorCode) {
-        return ApiResponse.<T>builder()
-                .success(false)
+    public <T> ApiExceptionResponse error(String message, int errorCode) {
+        return ApiExceptionResponse.builder()
+                .errorMessage(message)
                 .errorCode(errorCode)
-                .message(message)
-                .build();
-    }
-
-    public <T> ApiResponse<T> error() {
-        return ApiResponse.<T>builder()
-                .success(false)
                 .build();
     }
 }

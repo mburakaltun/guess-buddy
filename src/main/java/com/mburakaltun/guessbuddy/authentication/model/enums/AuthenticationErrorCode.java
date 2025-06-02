@@ -12,7 +12,9 @@ public enum AuthenticationErrorCode implements ErrorCode {
     INVALID_CREDENTIALS(2002, "Invalid credentials"),
     EMAIL_ALREADY_EXISTS(2003, "Email already exists"),
     USER_NOT_FOUND(2004, "User not found"),
-    PASSWORD_MISMATCH(2005, "Passwords do not match");
+    PASSWORD_MISMATCH(2005, "Passwords do not match"),
+    USERNAME_ALREADY_EXISTS(2006, "Username already exists")
+    ;
 
     private final int code;
     private final String message;

@@ -1,5 +1,7 @@
 package com.mburakaltun.guessbuddy.common.filter;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mburakaltun.guessbuddy.common.model.request.CreateRequestLogRequest;
 import com.mburakaltun.guessbuddy.common.service.RequestLogService;
 import com.mburakaltun.guessbuddy.common.util.StringUtility;
@@ -16,6 +18,9 @@ import org.springframework.web.util.ContentCachingResponseWrapper;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 @Order(1)
 @RequiredArgsConstructor
@@ -35,20 +40,23 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
         } finally {
             long duration = System.currentTimeMillis() - startTime;
 
+            String requestHeaders = getHeaders(wrappedRequest);
             String requestBody = getRequestBody(wrappedRequest);
             String responseBody = getResponseBody(wrappedResponse);
 
-            logRequestResponse(wrappedRequest, wrappedResponse, requestBody, responseBody, duration);
+            logRequestResponse(wrappedRequest, wrappedResponse, requestBody, responseBody, requestHeaders, duration);
 
             wrappedResponse.copyBodyToResponse();
         }
     }
 
-    private void logRequestResponse(ContentCachingRequestWrapper request, ContentCachingResponseWrapper wrappedResponse, String requestBody, String responseBody, long duration) {
+    private void logRequestResponse(ContentCachingRequestWrapper request, ContentCachingResponseWrapper wrappedResponse,
+                                    String requestBody, String responseBody, String requestHeaders, long duration) {
         CreateRequestLogRequest createRequestLogRequest = CreateRequestLogRequest.builder()
                 .requestUrl(request.getRequestURI())
                 .requestMethod(request.getMethod())
                 .requestIp(request.getRemoteAddr())
+                .requestHeaders(requestHeaders)
                 .requestPayload(requestBody)
                 .responsePayload(responseBody)
                 .responseStatus(wrappedResponse.getStatus())
@@ -66,6 +74,18 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
     private String getResponseBody(ContentCachingResponseWrapper response) {
         byte[] content = response.getContentAsByteArray();
         return formatBody(content);
+    }
+
+    private String getHeaders(HttpServletRequest request) {
+        Map<String, String> headers = new HashMap<>();
+        Collections.list(request.getHeaderNames()).forEach(headerName -> headers.put(headerName, request.getHeader(headerName)));
+
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.writeValueAsString(headers);
+        } catch (JsonProcessingException e) {
+            return "{}";
+        }
     }
 
     private String formatBody(byte[] content) {

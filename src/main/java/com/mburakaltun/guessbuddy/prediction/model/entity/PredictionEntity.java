@@ -14,5 +14,4 @@ public class PredictionEntity extends BaseEntity {
     private long creatorUserId;
     private String title;
     private String description;
-    private double averageScore;
 }

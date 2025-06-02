@@ -1,5 +1,6 @@
 package com.mburakaltun.guessbuddy.prediction.service;
 
+import com.mburakaltun.guessbuddy.common.util.StringUtility;
 import com.mburakaltun.guessbuddy.prediction.model.dto.PredictionDTO;
 import com.mburakaltun.guessbuddy.prediction.model.entity.PredictionEntity;
 import com.mburakaltun.guessbuddy.prediction.model.request.RequestCreatePrediction;
@@ -10,7 +11,10 @@ import com.mburakaltun.guessbuddy.prediction.repository.PredictionJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 
 @RequiredArgsConstructor
 @Service
@@ -34,7 +38,8 @@ public class PredictionService {
         int page = requestGetPredictions.getPage();
         int size = requestGetPredictions.getSize();
 
-        Page<PredictionEntity> predictionEntityPage = predictionJpaRepository.findAll(PageRequest.of(page, size));
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
+        Page<PredictionEntity> predictionEntityPage = predictionJpaRepository.findAll(pageRequest);
 
         return ResponseGetPredictions.builder()
                 .predictionDTOList(predictionEntityPage.stream()
@@ -46,12 +51,19 @@ public class PredictionService {
     private PredictionDTO mapPredictionEntityToDTO(PredictionEntity prediction) {
         return PredictionDTO.builder()
                 .predictionId(prediction.getId())
-                .createdDate(prediction.getCreatedDate().toString())
-                .updatedDate(prediction.getUpdatedDate().toString())
+                .createdDate(formatDateTime(prediction.getCreatedDate()))
+                .updatedDate(formatDateTime(prediction.getUpdatedDate()))
                 .creatorUserId(prediction.getCreatorUserId())
                 .title(prediction.getTitle())
                 .description(prediction.getDescription())
-                .averageScore(prediction.getAverageScore())
                 .build();
     }
+
+    private String formatDateTime(LocalDateTime dateTime) {
+        if (dateTime == null) {
+            return StringUtility.EMPTY;
+        }
+        return dateTime.format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd, HH:mm:ss"));
+    }
+
 }

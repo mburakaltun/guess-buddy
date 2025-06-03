@@ -2,6 +2,7 @@ package com.mburakaltun.guessbuddy.vote.controller;
 
 import com.mburakaltun.guessbuddy.common.constants.AppHeaders;
 import com.mburakaltun.guessbuddy.common.controller.BaseController;
+import com.mburakaltun.guessbuddy.common.exception.AppException;
 import com.mburakaltun.guessbuddy.common.model.response.ApiResponse;
 import com.mburakaltun.guessbuddy.vote.model.request.RequestVotePrediction;
 import com.mburakaltun.guessbuddy.vote.response.ResponseVotePrediction;
@@ -25,7 +26,7 @@ public class VoteController extends BaseController {
 
     @PostMapping("/votePrediction")
     public ResponseEntity<ApiResponse<ResponseVotePrediction>> votePrediction(@RequestHeader(AppHeaders.X_USER_ID) String userId,
-                                                                              @RequestBody @Valid RequestVotePrediction requestVotePrediction) {
+                                                                              @RequestBody @Valid RequestVotePrediction requestVotePrediction) throws AppException {
         ResponseVotePrediction response = voteService.votePrediction(requestVotePrediction, userId);
         return new ResponseEntity<>(respond(response), HttpStatus.CREATED);
     }

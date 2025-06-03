@@ -48,15 +48,24 @@ public class PredictionService {
                 .build();
     }
 
-    private PredictionDTO mapPredictionEntityToDTO(PredictionEntity prediction) {
+    private PredictionDTO mapPredictionEntityToDTO(PredictionEntity predictionEntity) {
         return PredictionDTO.builder()
-                .id(prediction.getId())
-                .createdDate(formatDateTime(prediction.getCreatedDate()))
-                .updatedDate(formatDateTime(prediction.getUpdatedDate()))
-                .creatorUserId(prediction.getCreatorUserId())
-                .title(prediction.getTitle())
-                .description(prediction.getDescription())
+                .id(predictionEntity.getId())
+                .createdDate(formatDateTime(predictionEntity.getCreatedDate()))
+                .updatedDate(formatDateTime(predictionEntity.getUpdatedDate()))
+                .creatorUserId(predictionEntity.getCreatorUserId())
+                .title(predictionEntity.getTitle())
+                .description(predictionEntity.getDescription())
+                .voteCount(predictionEntity.getVoteCount())
+                .averageScore(getAverageScore(predictionEntity))
                 .build();
+    }
+
+    private double getAverageScore(PredictionEntity predictionEntity) {
+        if (predictionEntity.getVoteCount() == 0) {
+            return 0.0;
+        }
+        return (double) predictionEntity.getTotalScore() / predictionEntity.getVoteCount();
     }
 
     private String formatDateTime(LocalDateTime dateTime) {

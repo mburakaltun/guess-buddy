@@ -13,5 +13,5 @@ public class PredictionDTO {
     private String title;
     private String description;
     private double averageScore;
-    private int voteCount;
+    private long voteCount;
 }

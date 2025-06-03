@@ -13,5 +13,5 @@ import lombok.Setter;
 public class VoteEntity extends BaseEntity {
     private long predictionId;
     private long voterUserId;
-    private double score;
+    private int score;
 }

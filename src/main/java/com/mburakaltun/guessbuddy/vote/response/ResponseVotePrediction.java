@@ -6,5 +6,5 @@ import lombok.Data;
 @Data
 @Builder
 public class ResponseVotePrediction {
-    private long voteId;
+    private boolean isVotedSuccessfully;
 }

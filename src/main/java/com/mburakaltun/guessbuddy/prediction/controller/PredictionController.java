@@ -35,8 +35,9 @@ public class PredictionController extends BaseController {
     }
 
     @GetMapping("/getPredictions")
-    public ResponseEntity<ApiResponse<ResponseGetPredictions>> getPredictions(@ModelAttribute @Valid RequestGetPredictions requestGetPredictions) {
-        ResponseGetPredictions response = predictionService.getPredictions(requestGetPredictions);
+    public ResponseEntity<ApiResponse<ResponseGetPredictions>> getPredictions(@RequestHeader(value = AppHeaders.X_USER_ID) String userId,
+                                                                              @ModelAttribute @Valid RequestGetPredictions requestGetPredictions) {
+        ResponseGetPredictions response = predictionService.getPredictions(requestGetPredictions, Long.valueOf(userId));
         return new ResponseEntity<>(respond(response), HttpStatus.OK);
     }
 }

@@ -22,13 +22,11 @@ public class VoteService {
     private final PredictionJpaRepository predictionJpaRepository;
 
     public ResponseVotePrediction votePrediction(@Valid RequestVotePrediction requestVotePrediction, String userId) throws AppException {
-        // Check if the prediction exists
         PredictionEntity predictionEntity = predictionJpaRepository.findById(requestVotePrediction.getPredictionId())
                 .orElseThrow(() -> new AppException(PredictionErrorCode.PREDICTION_NOT_FOUND));
 
         Optional<VoteEntity> existingVoteOptional = voteJpaRepository.findByPredictionIdAndVoterUserId(requestVotePrediction.getPredictionId(), Long.parseLong(userId));
         if (existingVoteOptional.isPresent()) {
-            // If the user has already voted, update the existing vote
             VoteEntity existingVoteEntity = existingVoteOptional.get();
             int oldScore = existingVoteEntity.getScore();
             existingVoteEntity.setScore(requestVotePrediction.getScore());

@@ -13,7 +13,7 @@ public class RequestVotePrediction {
     private Long predictionId;
 
     @NotNull
-    @Min(0)
-    @Max(10)
+    @Min(1)
+    @Max(5)
     private Integer score;
 }

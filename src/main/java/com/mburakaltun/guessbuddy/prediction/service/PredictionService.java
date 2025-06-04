@@ -1,5 +1,6 @@
 package com.mburakaltun.guessbuddy.prediction.service;
 
+import com.mburakaltun.guessbuddy.common.model.response.PageableResponse;
 import com.mburakaltun.guessbuddy.common.util.StringUtility;
 import com.mburakaltun.guessbuddy.prediction.model.dto.PredictionDTO;
 import com.mburakaltun.guessbuddy.prediction.model.entity.PredictionEntity;
@@ -8,19 +9,28 @@ import com.mburakaltun.guessbuddy.prediction.model.request.RequestGetPredictions
 import com.mburakaltun.guessbuddy.prediction.model.response.ResponseCreatePrediction;
 import com.mburakaltun.guessbuddy.prediction.model.response.ResponseGetPredictions;
 import com.mburakaltun.guessbuddy.prediction.repository.PredictionJpaRepository;
+import com.mburakaltun.guessbuddy.prediction.utility.PredictionMapper;
+import com.mburakaltun.guessbuddy.vote.model.entity.VoteEntity;
+import com.mburakaltun.guessbuddy.vote.repository.VoteJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
 public class PredictionService {
 
     private final PredictionJpaRepository predictionJpaRepository;
+    private final VoteJpaRepository voteJpaRepository;
 
     public ResponseCreatePrediction createPrediction(RequestCreatePrediction requestCreatePrediction, String userId) {
         PredictionEntity predictionEntity = new PredictionEntity();
@@ -34,45 +44,39 @@ public class PredictionService {
                 .build();
     }
 
-    public ResponseGetPredictions getPredictions(RequestGetPredictions requestGetPredictions) {
+    public ResponseGetPredictions getPredictions(RequestGetPredictions requestGetPredictions, Long userId) {
         int page = requestGetPredictions.getPage();
         int size = requestGetPredictions.getSize();
 
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
         Page<PredictionEntity> predictionEntityPage = predictionJpaRepository.findAll(pageRequest);
 
+        List<Long> predictionIds = predictionEntityPage.stream()
+                .map(PredictionEntity::getId)
+                .toList();
+
+        Map<Long, Integer> userVotesMap = getUserVotesMap(predictionIds, userId);
+
+        List<PredictionDTO> predictionDTOList = predictionEntityPage.stream()
+                .map(entity -> PredictionMapper.toDTO(entity, userVotesMap))
+                .toList();
+
         return ResponseGetPredictions.builder()
-                .predictionDTOList(predictionEntityPage.stream()
-                        .map(this::mapPredictionEntityToDTO)
-                        .toList())
+                .predictionDTOList(predictionDTOList)
+                .totalElements(predictionEntityPage.getTotalElements())
+                .totalPages(predictionEntityPage.getTotalPages())
+                .number(predictionEntityPage.getNumber())
+                .isLast(predictionEntityPage.isLast())
                 .build();
     }
 
-    private PredictionDTO mapPredictionEntityToDTO(PredictionEntity predictionEntity) {
-        return PredictionDTO.builder()
-                .id(predictionEntity.getId())
-                .createdDate(formatDateTime(predictionEntity.getCreatedDate()))
-                .updatedDate(formatDateTime(predictionEntity.getUpdatedDate()))
-                .creatorUserId(predictionEntity.getCreatorUserId())
-                .title(predictionEntity.getTitle())
-                .description(predictionEntity.getDescription())
-                .voteCount(predictionEntity.getVoteCount())
-                .averageScore(getAverageScore(predictionEntity))
-                .build();
-    }
-
-    private double getAverageScore(PredictionEntity predictionEntity) {
-        if (predictionEntity.getVoteCount() == 0) {
-            return 0.0;
+    private Map<Long, Integer> getUserVotesMap(List<Long> predictionIds, Long userId) {
+        Map<Long, Integer> userVotesMap = new HashMap<>();
+        if (userId != null && !CollectionUtils.isEmpty(predictionIds)) {
+            List<VoteEntity> userVotes = voteJpaRepository.findByPredictionIdInAndVoterUserId(predictionIds, userId);
+            userVotesMap = userVotes.stream().collect(Collectors.toMap(VoteEntity::getPredictionId, VoteEntity::getScore));
         }
-        return (double) predictionEntity.getTotalScore() / predictionEntity.getVoteCount();
-    }
-
-    private String formatDateTime(LocalDateTime dateTime) {
-        if (dateTime == null) {
-            return StringUtility.EMPTY;
-        }
-        return dateTime.format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd, HH:mm:ss"));
+        return userVotesMap;
     }
 
 }

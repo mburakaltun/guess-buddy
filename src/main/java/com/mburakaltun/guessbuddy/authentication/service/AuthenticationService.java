@@ -6,7 +6,7 @@ import com.mburakaltun.guessbuddy.authentication.model.request.RequestSignInUser
 import com.mburakaltun.guessbuddy.authentication.model.request.RequestSignUpUser;
 import com.mburakaltun.guessbuddy.authentication.model.response.ResponseSignInUser;
 import com.mburakaltun.guessbuddy.authentication.model.response.ResponseSignUpUser;
-import com.mburakaltun.guessbuddy.authentication.repository.UserRepository;
+import com.mburakaltun.guessbuddy.authentication.repository.UserJpaRepository;
 import com.mburakaltun.guessbuddy.common.model.enums.AuthorizationRole;
 import com.mburakaltun.guessbuddy.common.exception.AppException;
 import com.mburakaltun.guessbuddy.common.util.JwtUtility;
@@ -25,7 +25,7 @@ import org.springframework.stereotype.Service;
 public class AuthenticationService {
 
     private final BCryptPasswordEncoder passwordEncoder;
-    private final UserRepository userRepository;
+    private final UserJpaRepository userJpaRepository;
     private final AuthenticationManager authenticationManager;
 
     public ResponseSignUpUser signUpUser(RequestSignUpUser requestSignUpUser) throws AppException {
@@ -44,7 +44,7 @@ public class AuthenticationService {
         userEntity.setUsername(username);
         userEntity.setEncodedPassword(encodedPassword);
         userEntity.setRole(AuthorizationRole.ROLE_STANDARD_USER);
-        userRepository.save(userEntity);
+        userJpaRepository.save(userEntity);
 
         log.info("User signed up successfully with email: {}", email);
         return ResponseSignUpUser.builder()
@@ -56,7 +56,7 @@ public class AuthenticationService {
         String email = requestSignInUser.getEmail();
         String password = requestSignInUser.getPassword();
 
-        Long userId = validateUserCredentials(email, password);
+        UserEntity userEntity = validateUserCredentials(email, password);
         Authentication authentication = authenticateUser(email, password);
 
         AuthorizationRole role = generateRole(authentication);
@@ -65,7 +65,8 @@ public class AuthenticationService {
         log.info("User signed in successfully with email: {}", email);
         return ResponseSignInUser.builder()
                 .authenticationToken(authenticationToken)
-                .userId(String.valueOf(userId))
+                .userId(String.valueOf(userEntity.getId()))
+                .username(userEntity.getUsername())
                 .build();
     }
 
@@ -83,7 +84,7 @@ public class AuthenticationService {
     }
 
     private void validateEmail(String email) throws AppException {
-        boolean isEmailExist = userRepository.existsByEmail(email);
+        boolean isEmailExist = userJpaRepository.existsByEmail(email);
         if (isEmailExist) {
             log.error("Email already exists: {}", email);
             throw new AppException(AuthenticationErrorCode.EMAIL_ALREADY_EXISTS);
@@ -92,15 +93,15 @@ public class AuthenticationService {
 
 
     private void validateUsername(String username) throws AppException {
-        boolean isUsernameExist = userRepository.existsByUsername(username);
+        boolean isUsernameExist = userJpaRepository.existsByUsername(username);
         if (isUsernameExist) {
             log.error("Username already exists: {}", username);
             throw new AppException(AuthenticationErrorCode.USERNAME_ALREADY_EXISTS);
         }
     }
 
-    private Long validateUserCredentials(String email, String password) throws AppException {
-        UserEntity userEntity = userRepository.findByEmail(email).orElseThrow(() -> {
+    private UserEntity validateUserCredentials(String email, String password) throws AppException {
+        UserEntity userEntity = userJpaRepository.findByEmail(email).orElseThrow(() -> {
             log.error("Incorrect email or password: {}", email);
             return new AppException(AuthenticationErrorCode.INVALID_CREDENTIALS);
         });
@@ -111,7 +112,7 @@ public class AuthenticationService {
             log.error("Incorrect email or password: {}", email);
             throw new AppException(AuthenticationErrorCode.INVALID_CREDENTIALS);
         }
-        return userEntity.getId();
+        return userEntity;
     }
 
     private void validatePasswordMatch(RequestSignUpUser requestSignUpUser) throws AppException {

@@ -15,4 +15,5 @@ public class PredictionDTO {
     private double averageScore;
     private long voteCount;
     private int userScore;
+    private String creatorUsername;
 }

@@ -1,4 +1,4 @@
-package com.mburakaltun.guessbuddy.prediction.model.exception;
+package com.mburakaltun.guessbuddy.prediction.model.enums;
 
 import com.mburakaltun.guessbuddy.common.exception.ErrorCode;
 import lombok.Getter;

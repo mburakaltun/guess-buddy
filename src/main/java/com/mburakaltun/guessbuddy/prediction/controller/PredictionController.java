@@ -2,6 +2,7 @@ package com.mburakaltun.guessbuddy.prediction.controller;
 
 import com.mburakaltun.guessbuddy.common.constants.AppHeaders;
 import com.mburakaltun.guessbuddy.common.controller.BaseController;
+import com.mburakaltun.guessbuddy.common.exception.AppException;
 import com.mburakaltun.guessbuddy.common.model.response.ApiResponse;
 import com.mburakaltun.guessbuddy.prediction.model.request.RequestCreatePrediction;
 import com.mburakaltun.guessbuddy.prediction.model.request.RequestGetPredictions;
@@ -29,7 +30,7 @@ public class PredictionController extends BaseController {
 
     @PostMapping("/createPrediction")
     public ResponseEntity<ApiResponse<ResponseCreatePrediction>> createQuote(@RequestHeader(AppHeaders.X_USER_ID) String userId,
-                                                                             @RequestBody @Valid RequestCreatePrediction requestCreatePrediction) {
+                                                                             @RequestBody @Valid RequestCreatePrediction requestCreatePrediction) throws AppException {
         ResponseCreatePrediction response = predictionService.createPrediction(requestCreatePrediction, userId);
         return new ResponseEntity<>(respond(response), HttpStatus.CREATED);
     }

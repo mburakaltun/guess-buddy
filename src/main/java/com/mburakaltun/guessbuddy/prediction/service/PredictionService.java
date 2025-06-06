@@ -1,7 +1,9 @@
 package com.mburakaltun.guessbuddy.prediction.service;
 
-import com.mburakaltun.guessbuddy.common.model.response.PageableResponse;
-import com.mburakaltun.guessbuddy.common.util.StringUtility;
+import com.mburakaltun.guessbuddy.authentication.model.entity.UserEntity;
+import com.mburakaltun.guessbuddy.authentication.model.enums.AuthenticationErrorCode;
+import com.mburakaltun.guessbuddy.authentication.repository.UserJpaRepository;
+import com.mburakaltun.guessbuddy.common.exception.AppException;
 import com.mburakaltun.guessbuddy.prediction.model.dto.PredictionDTO;
 import com.mburakaltun.guessbuddy.prediction.model.entity.PredictionEntity;
 import com.mburakaltun.guessbuddy.prediction.model.request.RequestCreatePrediction;
@@ -19,10 +21,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -31,12 +33,18 @@ public class PredictionService {
 
     private final PredictionJpaRepository predictionJpaRepository;
     private final VoteJpaRepository voteJpaRepository;
+    private final UserJpaRepository userJpaRepository;
 
-    public ResponseCreatePrediction createPrediction(RequestCreatePrediction requestCreatePrediction, String userId) {
+    public ResponseCreatePrediction createPrediction(RequestCreatePrediction requestCreatePrediction, String userId) throws AppException {
+        Optional<UserEntity> userEntityOptional = userJpaRepository.findById(Long.parseLong(userId));
+        if (userEntityOptional.isEmpty()) {
+            throw new AppException(AuthenticationErrorCode.USER_NOT_FOUND);
+        }
+
         PredictionEntity predictionEntity = new PredictionEntity();
         predictionEntity.setTitle(requestCreatePrediction.getTitle());
         predictionEntity.setDescription(requestCreatePrediction.getDescription());
-        predictionEntity.setCreatorUserId(Long.parseLong(userId));
+        predictionEntity.setCreatorUser(userEntityOptional.get());
         PredictionEntity savedEntity = predictionJpaRepository.save(predictionEntity);
 
         return ResponseCreatePrediction.builder()

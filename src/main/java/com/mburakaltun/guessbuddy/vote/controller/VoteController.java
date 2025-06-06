@@ -19,15 +19,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/vote")
+@RequestMapping("/votes")
 public class VoteController extends BaseController {
 
     private final VoteService voteService;
 
-    @PostMapping("/votePrediction")
-    public ResponseEntity<ApiResponse<ResponseVotePrediction>> votePrediction(@RequestHeader(AppHeaders.X_USER_ID) String userId,
+    @PostMapping
+    public ResponseEntity<ApiResponse<ResponseVotePrediction>> createVote(@RequestHeader(AppHeaders.X_USER_ID) String userId,
                                                                               @RequestBody @Valid RequestVotePrediction requestVotePrediction) throws AppException {
-        ResponseVotePrediction response = voteService.votePrediction(requestVotePrediction, userId);
+        ResponseVotePrediction response = voteService.createVote(requestVotePrediction, userId);
         return new ResponseEntity<>(respond(response), HttpStatus.CREATED);
     }
 }

@@ -6,8 +6,10 @@ import com.mburakaltun.guessbuddy.common.exception.AppException;
 import com.mburakaltun.guessbuddy.common.model.response.ApiResponse;
 import com.mburakaltun.guessbuddy.prediction.model.request.RequestCreatePrediction;
 import com.mburakaltun.guessbuddy.prediction.model.request.RequestGetPredictions;
+import com.mburakaltun.guessbuddy.prediction.model.request.RequestGetUserPredictionRates;
 import com.mburakaltun.guessbuddy.prediction.model.response.ResponseCreatePrediction;
 import com.mburakaltun.guessbuddy.prediction.model.response.ResponseGetPredictions;
+import com.mburakaltun.guessbuddy.prediction.model.response.ResponseGetUserPredictionRates;
 import com.mburakaltun.guessbuddy.prediction.service.PredictionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,22 +25,28 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/prediction")
+@RequestMapping("/predictions")
 public class PredictionController extends BaseController {
 
     private final PredictionService predictionService;
 
-    @PostMapping("/createPrediction")
+    @PostMapping
     public ResponseEntity<ApiResponse<ResponseCreatePrediction>> createQuote(@RequestHeader(AppHeaders.X_USER_ID) String userId,
                                                                              @RequestBody @Valid RequestCreatePrediction requestCreatePrediction) throws AppException {
         ResponseCreatePrediction response = predictionService.createPrediction(requestCreatePrediction, userId);
         return new ResponseEntity<>(respond(response), HttpStatus.CREATED);
     }
 
-    @GetMapping("/getPredictions")
+    @GetMapping
     public ResponseEntity<ApiResponse<ResponseGetPredictions>> getPredictions(@RequestHeader(value = AppHeaders.X_USER_ID) String userId,
                                                                               @ModelAttribute @Valid RequestGetPredictions requestGetPredictions) {
         ResponseGetPredictions response = predictionService.getPredictions(requestGetPredictions, Long.valueOf(userId));
+        return new ResponseEntity<>(respond(response), HttpStatus.OK);
+    }
+
+    @GetMapping("/user-hit-rates")
+    public ResponseEntity<ApiResponse<ResponseGetUserPredictionRates>> getUserPredictionRates(@ModelAttribute @Valid RequestGetUserPredictionRates requestGetUserPredictionRates) {
+        ResponseGetUserPredictionRates response = predictionService.getUserPredictionRates(requestGetUserPredictionRates);
         return new ResponseEntity<>(respond(response), HttpStatus.OK);
     }
 }

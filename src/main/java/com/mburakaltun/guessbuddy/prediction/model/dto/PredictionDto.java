@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class PredictionDTO {
+public class PredictionDto {
     private Long id;
     private String createdDate;
     private String updatedDate;

@@ -21,7 +21,7 @@ public class VoteService {
     private final VoteJpaRepository voteJpaRepository;
     private final PredictionJpaRepository predictionJpaRepository;
 
-    public ResponseVotePrediction votePrediction(@Valid RequestVotePrediction requestVotePrediction, String userId) throws AppException {
+    public ResponseVotePrediction createVote(@Valid RequestVotePrediction requestVotePrediction, String userId) throws AppException {
         PredictionEntity predictionEntity = predictionJpaRepository.findById(requestVotePrediction.getPredictionId())
                 .orElseThrow(() -> new AppException(PredictionErrorCode.PREDICTION_NOT_FOUND));
 

@@ -6,24 +6,10 @@ import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class ResponseUtility {
-    public <T> ApiResponse<T> success() {
-        return ApiResponse.<T>builder()
-                .success(true)
-                .build();
-    }
 
     public <T> ApiResponse<T> success(T data) {
         return ApiResponse.<T>builder()
-                .success(true)
                 .data(data)
-                .build();
-    }
-
-    public <T> ApiResponse<T> success(T data, String message) {
-        return ApiResponse.<T>builder()
-                .success(true)
-                .data(data)
-                .message(message)
                 .build();
     }
 

@@ -24,13 +24,13 @@ public class AuthenticationController extends BaseController {
 
     private final AuthenticationService authenticationService;
 
-    @PostMapping("/signUp")
+    @PostMapping("/sign-up")
     public ResponseEntity<ApiResponse<ResponseSignUpUser>> signUp(@Valid @RequestBody RequestSignUpUser requestSignUpUser) throws AppException {
         ResponseSignUpUser response = authenticationService.signUpUser(requestSignUpUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(respond(response));
     }
 
-    @PostMapping("/signIn")
+    @PostMapping("/sign-in")
     public ResponseEntity<ApiResponse<ResponseSignInUser>> signIn(@Valid @RequestBody RequestSignInUser requestSignInUser) throws AppException {
         ResponseSignInUser response = authenticationService.signInUser(requestSignInUser);
         return ResponseEntity.ok(respond(response));

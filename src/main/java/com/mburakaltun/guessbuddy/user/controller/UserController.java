@@ -17,11 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/users")
 public class UserController extends BaseController {
     private final UserService userService;
 
-    @GetMapping("/profile")
+    @GetMapping("/me")
     public ResponseEntity<ApiResponse<ResponseGetUserProfile>> getUserProfile(@RequestHeader(AppHeaders.X_USER_ID) String userId,
                                                                               @ModelAttribute RequestGetUserProfile requestGetUserProfile) throws AppException {
         ResponseGetUserProfile response = userService.getUserProfile(requestGetUserProfile, Long.valueOf(userId));

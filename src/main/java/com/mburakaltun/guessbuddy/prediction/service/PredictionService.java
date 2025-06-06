@@ -21,6 +21,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -92,9 +93,18 @@ public class PredictionService {
     }
 
     public ResponseGetUserPredictionRates getUserPredictionRates(RequestGetUserPredictionRates requestGetUserPredictionRates) {
-        List<UserPredictionHitRateDto> userPredictionHitRateDtoList = predictionJpaRepository.findAllUsersByPredictionHitRate();
+        int page = requestGetUserPredictionRates.getPage();
+        int size = requestGetUserPredictionRates.getSize();
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<UserPredictionHitRateDto> userPredictionHitRateDtoPage = predictionJpaRepository.findAllUsersByPredictionHitRate(pageable);
+
         return ResponseGetUserPredictionRates.builder()
-                .userPredictionHitRateDtoList(userPredictionHitRateDtoList)
+                .userPredictionHitRateDtoList(userPredictionHitRateDtoPage.getContent())
+                .totalElements(userPredictionHitRateDtoPage.getTotalElements())
+                .totalPages(userPredictionHitRateDtoPage.getTotalPages())
+                .number(userPredictionHitRateDtoPage.getNumber())
+                .isLast(userPredictionHitRateDtoPage.isLast())
                 .build();
     }
 }

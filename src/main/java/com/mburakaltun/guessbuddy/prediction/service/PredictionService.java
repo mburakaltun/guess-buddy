@@ -4,7 +4,9 @@ import com.mburakaltun.guessbuddy.authentication.model.entity.UserEntity;
 import com.mburakaltun.guessbuddy.authentication.model.enums.AuthenticationErrorCode;
 import com.mburakaltun.guessbuddy.prediction.model.dto.UserPredictionHitRateDto;
 import com.mburakaltun.guessbuddy.prediction.model.request.RequestGetUserPredictionRates;
+import com.mburakaltun.guessbuddy.prediction.model.request.RequestGetUserPredictions;
 import com.mburakaltun.guessbuddy.prediction.model.response.ResponseGetUserPredictionRates;
+import com.mburakaltun.guessbuddy.prediction.model.response.ResponseGetUserPredictions;
 import com.mburakaltun.guessbuddy.user.repository.UserJpaRepository;
 import com.mburakaltun.guessbuddy.common.exception.AppException;
 import com.mburakaltun.guessbuddy.prediction.model.dto.PredictionDto;
@@ -17,7 +19,6 @@ import com.mburakaltun.guessbuddy.prediction.repository.PredictionJpaRepository;
 import com.mburakaltun.guessbuddy.prediction.utility.PredictionMapper;
 import com.mburakaltun.guessbuddy.vote.model.entity.VoteEntity;
 import com.mburakaltun.guessbuddy.vote.repository.VoteJpaRepository;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -71,7 +72,7 @@ public class PredictionService {
         Map<Long, Integer> userVotesMap = getUserVotesMap(predictionIds, userId);
 
         List<PredictionDto> predictionDtoList = predictionEntityPage.stream()
-                .map(entity -> PredictionMapper.toDTO(entity, userVotesMap))
+                .map(entity -> PredictionMapper.toDto(entity, userVotesMap))
                 .toList();
 
         return ResponseGetPredictions.builder()
@@ -105,6 +106,26 @@ public class PredictionService {
                 .totalPages(userPredictionHitRateDtoPage.getTotalPages())
                 .number(userPredictionHitRateDtoPage.getNumber())
                 .isLast(userPredictionHitRateDtoPage.isLast())
+                .build();
+    }
+
+    public ResponseGetUserPredictions getUserPredictions(RequestGetUserPredictions requestGetUserPredictions, Long userId) {
+        int page = requestGetUserPredictions.getPage();
+        int size = requestGetUserPredictions.getSize();
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<PredictionEntity> predictionEntityPage = predictionJpaRepository.findByCreatorUserIdOrderByAverageScore(userId, pageable);
+
+        List<PredictionDto> predictionDtoList = predictionEntityPage.stream()
+                .map(PredictionMapper::toDto)
+                .toList();
+
+        return ResponseGetUserPredictions.builder()
+                .predictionDtoList(predictionDtoList)
+                .totalElements(predictionEntityPage.getTotalElements())
+                .totalPages(predictionEntityPage.getTotalPages())
+                .number(predictionEntityPage.getNumber())
+                .isLast(predictionEntityPage.isLast())
                 .build();
     }
 }

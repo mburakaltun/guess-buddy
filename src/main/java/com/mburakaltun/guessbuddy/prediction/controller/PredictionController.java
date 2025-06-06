@@ -11,6 +11,8 @@ import com.mburakaltun.guessbuddy.prediction.model.response.ResponseCreatePredic
 import com.mburakaltun.guessbuddy.prediction.model.response.ResponseGetPredictions;
 import com.mburakaltun.guessbuddy.prediction.model.response.ResponseGetUserPredictionRates;
 import com.mburakaltun.guessbuddy.prediction.service.PredictionService;
+import com.mburakaltun.guessbuddy.prediction.model.request.RequestGetUserPredictions;
+import com.mburakaltun.guessbuddy.prediction.model.response.ResponseGetUserPredictions;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -48,5 +50,12 @@ public class PredictionController extends BaseController {
     public ResponseEntity<ApiResponse<ResponseGetUserPredictionRates>> getUserPredictionRates(@ModelAttribute @Valid RequestGetUserPredictionRates requestGetUserPredictionRates) {
         ResponseGetUserPredictionRates response = predictionService.getUserPredictionRates(requestGetUserPredictionRates);
         return new ResponseEntity<>(respond(response), HttpStatus.OK);
+    }
+
+    @GetMapping("/my-predictions")
+    public ResponseEntity<ApiResponse<ResponseGetUserPredictions>> getUserPredictions(@RequestHeader(AppHeaders.X_USER_ID) String userId,
+                                                                                      @ModelAttribute RequestGetUserPredictions requestGetUserPredictions) throws AppException {
+        ResponseGetUserPredictions response = predictionService.getUserPredictions(requestGetUserPredictions, Long.valueOf(userId));
+        return ResponseEntity.ok(respond(response));
     }
 }

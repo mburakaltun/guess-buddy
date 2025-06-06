@@ -38,8 +38,8 @@ server:
 
 authentication:
   whitelisted-endpoints:
-    - /authentication/signUp
-    - /authentication/signIn
+    - /authentication/sign-up
+    - /authentication/sign-in
 
 management:
   endpoints:

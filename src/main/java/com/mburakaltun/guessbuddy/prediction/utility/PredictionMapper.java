@@ -11,7 +11,7 @@ import java.util.Map;
 @UtilityClass
 public class PredictionMapper {
 
-    public PredictionDto toDTO(PredictionEntity predictionEntity, Map<Long, Integer> userVotesMap) {
+    public PredictionDto toDto(PredictionEntity predictionEntity, Map<Long, Integer> userVotesMap) {
         int userScore = userVotesMap.getOrDefault(predictionEntity.getId(), 0);
 
         return PredictionDto.builder()
@@ -25,6 +25,21 @@ public class PredictionMapper {
                 .voteCount(predictionEntity.getVoteCount())
                 .averageScore(getAverageScore(predictionEntity))
                 .userScore(userScore)
+                .build();
+    }
+
+    public PredictionDto toDto(PredictionEntity predictionEntity) {
+        return PredictionDto.builder()
+                .id(predictionEntity.getId())
+                .createdDate(formatDateTime(predictionEntity.getCreatedDate()))
+                .updatedDate(formatDateTime(predictionEntity.getUpdatedDate()))
+                .creatorUserId(predictionEntity.getCreatorUser().getId())
+                .creatorUsername(predictionEntity.getCreatorUser().getUsername())
+                .title(predictionEntity.getTitle())
+                .description(predictionEntity.getDescription())
+                .voteCount(predictionEntity.getVoteCount())
+                .averageScore(getAverageScore(predictionEntity))
+                .userScore(0)
                 .build();
     }
 

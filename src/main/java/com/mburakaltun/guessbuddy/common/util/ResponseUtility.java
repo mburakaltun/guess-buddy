@@ -35,8 +35,8 @@ public class ResponseUtility {
 
     public <T> ApiExceptionResponse error(String errorMessage, String errorCode) {
         return ApiExceptionResponse.builder()
-                .errorMessage(errorMessage)
                 .errorCode(errorCode)
+                .errorMessage(errorMessage)
                 .build();
     }
 }

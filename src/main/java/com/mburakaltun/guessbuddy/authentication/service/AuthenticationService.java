@@ -6,7 +6,7 @@ import com.mburakaltun.guessbuddy.authentication.model.request.RequestSignInUser
 import com.mburakaltun.guessbuddy.authentication.model.request.RequestSignUpUser;
 import com.mburakaltun.guessbuddy.authentication.model.response.ResponseSignInUser;
 import com.mburakaltun.guessbuddy.authentication.model.response.ResponseSignUpUser;
-import com.mburakaltun.guessbuddy.authentication.repository.UserJpaRepository;
+import com.mburakaltun.guessbuddy.user.repository.UserJpaRepository;
 import com.mburakaltun.guessbuddy.common.model.enums.AuthorizationRole;
 import com.mburakaltun.guessbuddy.common.exception.AppException;
 import com.mburakaltun.guessbuddy.common.util.JwtUtility;

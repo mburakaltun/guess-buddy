@@ -1,7 +1,7 @@
 package com.mburakaltun.guessbuddy.authentication.service;
 
 import com.mburakaltun.guessbuddy.authentication.model.entity.UserEntity;
-import com.mburakaltun.guessbuddy.authentication.repository.UserJpaRepository;
+import com.mburakaltun.guessbuddy.user.repository.UserJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

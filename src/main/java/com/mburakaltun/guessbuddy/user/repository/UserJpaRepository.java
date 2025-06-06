@@ -1,4 +1,4 @@
-package com.mburakaltun.guessbuddy.authentication.repository;
+package com.mburakaltun.guessbuddy.user.repository;
 
 import com.mburakaltun.guessbuddy.authentication.model.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -2,7 +2,7 @@ package com.mburakaltun.guessbuddy.prediction.service;
 
 import com.mburakaltun.guessbuddy.authentication.model.entity.UserEntity;
 import com.mburakaltun.guessbuddy.authentication.model.enums.AuthenticationErrorCode;
-import com.mburakaltun.guessbuddy.authentication.repository.UserJpaRepository;
+import com.mburakaltun.guessbuddy.user.repository.UserJpaRepository;
 import com.mburakaltun.guessbuddy.common.exception.AppException;
 import com.mburakaltun.guessbuddy.prediction.model.dto.PredictionDTO;
 import com.mburakaltun.guessbuddy.prediction.model.entity.PredictionEntity;

@@ -8,14 +8,13 @@ import lombok.RequiredArgsConstructor;
 @Getter
 public enum AuthenticationErrorCode implements ErrorCode {
 
-    AUTHENTICATION_FAILED(2001, "Authentication failed"),
-    INVALID_CREDENTIALS(2002, "Invalid credentials"),
-    EMAIL_ALREADY_EXISTS(2003, "Email already exists"),
-    USER_NOT_FOUND(2004, "User not found"),
-    PASSWORD_MISMATCH(2005, "Passwords do not match"),
-    USERNAME_ALREADY_EXISTS(2006, "Username already exists")
+    AUTHENTICATION_FAILED("AUTH_0001"),
+    INVALID_CREDENTIALS("AUTH_0002"),
+    EMAIL_ALREADY_EXISTS("AUTH_0003"),
+    USER_NOT_FOUND("AUTH_0004"),
+    PASSWORD_MISMATCH("AUTH_0005"),
+    USERNAME_ALREADY_EXISTS("AUTH_0006")
     ;
 
-    private final int code;
-    private final String message;
+    private final String code;
 }

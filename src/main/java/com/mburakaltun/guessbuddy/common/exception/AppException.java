@@ -1,19 +1,13 @@
 package com.mburakaltun.guessbuddy.common.exception;
 
+import lombok.Getter;
+
+@Getter
 public class AppException extends Exception {
     private final ErrorCode errorCode;
 
     public AppException(ErrorCode errorCode) {
-        super(errorCode.getMessage());
+        super(errorCode.getCode());
         this.errorCode = errorCode;
-    }
-
-    public int getCode() {
-        return errorCode.getCode();
-    }
-
-    @Override
-    public String getMessage() {
-        return errorCode.getMessage();
     }
 }

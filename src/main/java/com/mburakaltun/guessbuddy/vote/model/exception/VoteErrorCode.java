@@ -7,8 +7,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Getter
 public enum VoteErrorCode implements ErrorCode {
-    VOTE_NOT_FOUND(1001, "Vote not found");
+    VOTE_NOT_FOUND("VOTE_0001");
 
-    private final int code;
-    private final String message;
+    private final String code;
 }

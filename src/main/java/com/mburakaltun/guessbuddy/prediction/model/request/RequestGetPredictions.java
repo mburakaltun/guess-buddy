@@ -8,11 +8,11 @@ import lombok.Data;
 @Data
 @Builder
 public class RequestGetPredictions {
-    @NotNull
-    @Min(0)
+    @NotNull(message = "{validation.page.notNull}")
+    @Min(value = 0, message = "{validation.page.min}")
     private Integer page;
 
-    @NotNull
-    @Min(1)
+    @NotNull(message = "{validation.size.notNull}")
+    @Min(value = 1, message = "{validation.size.min}")
     private Integer size;
 }

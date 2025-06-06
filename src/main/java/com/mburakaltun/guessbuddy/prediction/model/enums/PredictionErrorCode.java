@@ -7,8 +7,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Getter
 public enum PredictionErrorCode implements ErrorCode {
-    PREDICTION_NOT_FOUND(2001, "Prediction not found");
+    PREDICTION_NOT_FOUND("PREDICTION_0001");
 
-    private final int code;
-    private final String message;
+    private final String code;
 }

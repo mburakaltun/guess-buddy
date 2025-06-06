@@ -9,11 +9,11 @@ import lombok.Data;
 @Data
 @Builder
 public class RequestVotePrediction {
-    @NotNull
+    @NotNull(message = "{validation.predictionId.notNull}")
     private Long predictionId;
 
-    @NotNull
-    @Min(1)
-    @Max(5)
+    @NotNull(message = "{validation.score.notNull}")
+    @Min(value = 1, message = "{validation.score.min}")
+    @Max(value = 5, message = "{validation.score.max}")
     private Integer score;
 }

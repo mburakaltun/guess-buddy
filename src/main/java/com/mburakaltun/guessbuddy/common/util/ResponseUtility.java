@@ -27,15 +27,15 @@ public class ResponseUtility {
                 .build();
     }
 
-    public <T> ApiExceptionResponse error(String message) {
+    public <T> ApiExceptionResponse error(String errorMessage) {
         return ApiExceptionResponse.builder()
-                .errorMessage(message)
+                .errorMessage(errorMessage)
                 .build();
     }
 
-    public <T> ApiExceptionResponse error(String message, int errorCode) {
+    public <T> ApiExceptionResponse error(String errorMessage, String errorCode) {
         return ApiExceptionResponse.builder()
-                .errorMessage(message)
+                .errorMessage(errorMessage)
                 .errorCode(errorCode)
                 .build();
     }

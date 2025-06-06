@@ -1,10 +1,10 @@
 package com.mburakaltun.guessbuddy.common.exception;
 
 import com.mburakaltun.guessbuddy.common.model.response.ApiExceptionResponse;
-import com.mburakaltun.guessbuddy.common.model.response.ApiResponse;
 import com.mburakaltun.guessbuddy.common.util.ResponseUtility;
-import io.jsonwebtoken.ExpiredJwtException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authorization.AuthorizationDeniedException;
@@ -15,16 +15,24 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import javax.security.auth.login.LoginException;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Slf4j
 @RestControllerAdvice
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
 
+    private final MessageSource messageSource;
+    private final String SYSTEM_ERROR_MESSAGE_KEY = "SYSTEM_0000";
+
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiExceptionResponse> handleException(Exception exception) {
-        log.error(exception.getMessage(), exception);
-        ApiExceptionResponse response = ResponseUtility.error("An error occurred!");
+    public ResponseEntity<ApiExceptionResponse> handleException(Exception exception, Locale locale) {
+        String errorCode = SYSTEM_ERROR_MESSAGE_KEY;
+        String errorMessage = getLocalizedMessage(errorCode, locale);
+
+        log.error(errorMessage, exception);
+        ApiExceptionResponse response = ResponseUtility.error(errorMessage, errorCode);
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -55,9 +63,12 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(AppException.class)
-    public ResponseEntity<ApiExceptionResponse> handleAppException(AppException exception) {
+    public ResponseEntity<ApiExceptionResponse> handleAppException(AppException exception, Locale locale) {
+        String errorCode = exception.getErrorCode().getCode();
+        String errorMessage = getLocalizedMessage(errorCode, locale);
+
         log.error(exception.getMessage(), exception);
-        ApiExceptionResponse response = ResponseUtility.error(exception.getMessage(), exception.getCode());
+        ApiExceptionResponse response = ResponseUtility.error(errorMessage, exception.getErrorCode().getCode());
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -66,5 +77,9 @@ public class GlobalExceptionHandler {
         log.error(exception.getMessage(), exception);
         ApiExceptionResponse response = ResponseUtility.error(exception.getMessage());
         return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+    }
+
+    public String getLocalizedMessage(String messageKey, Locale locale) {
+        return messageSource.getMessage(messageKey, null, locale);
     }
 }

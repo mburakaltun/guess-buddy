@@ -14,11 +14,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class RequestSignInUser {
 
-    @NotBlank(message = "Email must not be null or empty")
-    @Email(message = "Invalid email format")
+    @NotBlank(message = "{validation.email.notBlank}")
+    @Email(message = "{validation.email.invalid}")
     private String email;
 
-    @NotBlank(message = "Password must not be null or empty")
-    @Size(min = 8, message = "Password must be at least 8 characters long")
+    @NotBlank(message = "{validation.password.notBlank}")
+    @Size(min = 8, message = "{validation.password.size}")
     private String password;
 }

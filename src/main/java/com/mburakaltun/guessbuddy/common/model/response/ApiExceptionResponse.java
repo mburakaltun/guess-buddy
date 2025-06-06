@@ -7,5 +7,5 @@ import lombok.Data;
 @Builder
 public class ApiExceptionResponse {
     private String errorMessage;
-    private int errorCode;
+    private String errorCode;
 }

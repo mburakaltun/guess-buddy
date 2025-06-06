@@ -14,18 +14,18 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class RequestSignUpUser {
 
-    @NotBlank(message = "Email must not be null or empty")
-    @Email(message = "Invalid email format")
+    @NotBlank(message = "{validation.email.notBlank}")
+    @Email(message = "{validation.email.invalid}")
     private String email;
 
-    @NotBlank(message = "Username must not be null or empty")
-    @Size(min = 3, max = 31, message = "Username must be between 3 and 31 characters long")
+    @NotBlank(message = "{validation.username.notBlank}")
+    @Size(min = 3, max = 31, message = "{validation.username.size}")
     private String username;
 
-    @NotBlank(message = "Password must not be null or empty")
-    @Size(min = 8, message = "Password must be at least 8 characters long")
+    @NotBlank(message = "{validation.password.notBlank}")
+    @Size(min = 8, message = "{validation.password.size}")
     private String password;
 
-    @NotBlank(message = "Password confirmation must not be null or empty")
+    @NotBlank(message = "{validation.confirmPassword.notBlank}")
     private String confirmPassword;
 }

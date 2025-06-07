@@ -3,11 +3,18 @@ package com.mburakaltun.guessbuddy.prediction.model.dto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.io.Serial;
+import java.io.Serializable;
 
 @Data
 @Builder
 @AllArgsConstructor
-public class UserPredictionHitRateDto {
+@NoArgsConstructor
+public class UserPredictionHitRateDto implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
     private Long userId;
     private String username;
     private Long totalPredictionCount;

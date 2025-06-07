@@ -1,5 +1,6 @@
 package com.mburakaltun.guessbuddy.vote.service;
 
+import com.mburakaltun.guessbuddy.common.constants.CacheNames;
 import com.mburakaltun.guessbuddy.common.exception.AppException;
 import com.mburakaltun.guessbuddy.prediction.model.entity.PredictionEntity;
 import com.mburakaltun.guessbuddy.prediction.model.enums.PredictionErrorCode;
@@ -10,6 +11,7 @@ import com.mburakaltun.guessbuddy.vote.repository.VoteJpaRepository;
 import com.mburakaltun.guessbuddy.vote.response.ResponseVotePrediction;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -21,6 +23,7 @@ public class VoteService {
     private final VoteJpaRepository voteJpaRepository;
     private final PredictionJpaRepository predictionJpaRepository;
 
+    @CacheEvict(cacheNames = {CacheNames.PREDICTIONS, CacheNames.USER_PREDICTIONS, CacheNames.PREDICTION_RATES}, allEntries = true)
     public ResponseVotePrediction createVote(@Valid RequestVotePrediction requestVotePrediction, String userId) throws AppException {
         PredictionEntity predictionEntity = predictionJpaRepository.findById(requestVotePrediction.getPredictionId())
                 .orElseThrow(() -> new AppException(PredictionErrorCode.PREDICTION_NOT_FOUND));

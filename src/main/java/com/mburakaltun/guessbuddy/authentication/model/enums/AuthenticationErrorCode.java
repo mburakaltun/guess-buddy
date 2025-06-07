@@ -13,7 +13,9 @@ public enum AuthenticationErrorCode implements ErrorCode {
     EMAIL_ALREADY_EXISTS("AUTH_0003"),
     USER_NOT_FOUND("AUTH_0004"),
     PASSWORD_MISMATCH("AUTH_0005"),
-    USERNAME_ALREADY_EXISTS("AUTH_0006")
+    USERNAME_ALREADY_EXISTS("AUTH_0006"),
+    TOKEN_NOT_FOUND("AUTH_0007"),
+    TOKEN_EXPIRED("AUTH_0008"),
     ;
 
     private final String code;

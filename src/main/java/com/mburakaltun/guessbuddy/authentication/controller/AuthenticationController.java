@@ -1,8 +1,10 @@
 package com.mburakaltun.guessbuddy.authentication.controller;
 
+import com.mburakaltun.guessbuddy.authentication.model.request.RequestCompleteForgotPassword;
 import com.mburakaltun.guessbuddy.authentication.model.request.RequestStartForgotPassword;
 import com.mburakaltun.guessbuddy.authentication.model.request.RequestSignInUser;
 import com.mburakaltun.guessbuddy.authentication.model.request.RequestSignUpUser;
+import com.mburakaltun.guessbuddy.authentication.model.response.ResponseCompleteForgotPassword;
 import com.mburakaltun.guessbuddy.authentication.model.response.ResponseStartForgotPassword;
 import com.mburakaltun.guessbuddy.authentication.model.response.ResponseSignInUser;
 import com.mburakaltun.guessbuddy.authentication.model.response.ResponseSignUpUser;
@@ -41,6 +43,12 @@ public class AuthenticationController extends BaseController {
     @PostMapping("/start-forgot-password")
     public ResponseEntity<ApiResponse<ResponseStartForgotPassword>> startForgotPassword(@Valid @RequestBody RequestStartForgotPassword requestStartForgotPassword) throws AppException {
         ResponseStartForgotPassword response = authenticationService.startForgotPassword(requestStartForgotPassword);
+        return ResponseEntity.ok(respond(response));
+    }
+
+    @PostMapping("/complete-forgot-password")
+    public ResponseEntity<ApiResponse<ResponseCompleteForgotPassword>> completeForgotPassword(@Valid @RequestBody RequestCompleteForgotPassword requestCompleteForgotPassword) throws AppException {
+        ResponseCompleteForgotPassword response = authenticationService.completeForgotPassword(requestCompleteForgotPassword);
         return ResponseEntity.ok(respond(response));
     }
 }

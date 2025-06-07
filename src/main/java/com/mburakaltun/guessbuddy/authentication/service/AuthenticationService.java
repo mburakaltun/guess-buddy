@@ -3,9 +3,11 @@ package com.mburakaltun.guessbuddy.authentication.service;
 import com.mburakaltun.guessbuddy.authentication.model.entity.PasswordResetTokenEntity;
 import com.mburakaltun.guessbuddy.authentication.model.entity.UserEntity;
 import com.mburakaltun.guessbuddy.authentication.model.enums.AuthenticationErrorCode;
+import com.mburakaltun.guessbuddy.authentication.model.request.RequestCompleteForgotPassword;
 import com.mburakaltun.guessbuddy.authentication.model.request.RequestStartForgotPassword;
 import com.mburakaltun.guessbuddy.authentication.model.request.RequestSignInUser;
 import com.mburakaltun.guessbuddy.authentication.model.request.RequestSignUpUser;
+import com.mburakaltun.guessbuddy.authentication.model.response.ResponseCompleteForgotPassword;
 import com.mburakaltun.guessbuddy.authentication.model.response.ResponseStartForgotPassword;
 import com.mburakaltun.guessbuddy.authentication.model.response.ResponseSignInUser;
 import com.mburakaltun.guessbuddy.authentication.model.response.ResponseSignUpUser;
@@ -25,6 +27,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -38,6 +41,8 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final JavaMailSender javaMailSender;
     private final PasswordResetTokenJpaRepository passwordResetTokenJpaRepository;
+
+    private static final long TOKEN_EXPIRY_MINUTES = 15L;
 
     public ResponseSignUpUser signUpUser(RequestSignUpUser requestSignUpUser) throws AppException {
         String email = requestSignUpUser.getEmail();
@@ -182,6 +187,36 @@ public class AuthenticationService {
         PasswordResetTokenEntity passwordResetTokenEntity = passwordResetTokenEntityOptional.orElseGet(PasswordResetTokenEntity::new);
         passwordResetTokenEntity.setToken(token);
         passwordResetTokenEntity.setUserEntity(userEntity);
+        passwordResetTokenEntity.setExpiryDate(LocalDateTime.now().plusMinutes(TOKEN_EXPIRY_MINUTES));
         passwordResetTokenJpaRepository.save(passwordResetTokenEntity);
+    }
+
+    public ResponseCompleteForgotPassword completeForgotPassword(RequestCompleteForgotPassword requestCompleteForgotPassword) throws AppException {
+        String token = requestCompleteForgotPassword.getToken();
+        String newPassword = requestCompleteForgotPassword.getNewPassword();
+
+        PasswordResetTokenEntity passwordResetTokenEntity = validateToken(token);
+        UserEntity userEntity = passwordResetTokenEntity.getUserEntity();
+
+        String encodedPassword = passwordEncoder.encode(newPassword);
+        userEntity.setEncodedPassword(encodedPassword);
+        userJpaRepository.save(userEntity);
+
+        passwordResetTokenJpaRepository.delete(passwordResetTokenEntity);
+
+        return ResponseCompleteForgotPassword.builder()
+                .userId(String.valueOf(userEntity.getId()))
+                .build();
+    }
+
+    private PasswordResetTokenEntity validateToken(String token) throws AppException {
+        PasswordResetTokenEntity passwordResetTokenEntity = passwordResetTokenJpaRepository
+                .findByToken(token)
+                .orElseThrow(() -> new AppException(AuthenticationErrorCode.TOKEN_NOT_FOUND));
+
+        if (passwordResetTokenEntity.getExpiryDate().isBefore(LocalDateTime.now())) {
+            throw new AppException(AuthenticationErrorCode.TOKEN_EXPIRED);
+        }
+        return passwordResetTokenEntity;
     }
 }

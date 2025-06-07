@@ -1,23 +1,32 @@
 package com.mburakaltun.guessbuddy.authentication.service;
 
+import com.mburakaltun.guessbuddy.authentication.model.entity.PasswordResetTokenEntity;
 import com.mburakaltun.guessbuddy.authentication.model.entity.UserEntity;
 import com.mburakaltun.guessbuddy.authentication.model.enums.AuthenticationErrorCode;
+import com.mburakaltun.guessbuddy.authentication.model.request.RequestStartForgotPassword;
 import com.mburakaltun.guessbuddy.authentication.model.request.RequestSignInUser;
 import com.mburakaltun.guessbuddy.authentication.model.request.RequestSignUpUser;
+import com.mburakaltun.guessbuddy.authentication.model.response.ResponseStartForgotPassword;
 import com.mburakaltun.guessbuddy.authentication.model.response.ResponseSignInUser;
 import com.mburakaltun.guessbuddy.authentication.model.response.ResponseSignUpUser;
+import com.mburakaltun.guessbuddy.authentication.repository.PasswordResetTokenJpaRepository;
 import com.mburakaltun.guessbuddy.user.repository.UserJpaRepository;
 import com.mburakaltun.guessbuddy.common.model.enums.AuthorizationRole;
 import com.mburakaltun.guessbuddy.common.exception.AppException;
 import com.mburakaltun.guessbuddy.common.util.JwtUtility;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -27,6 +36,8 @@ public class AuthenticationService {
     private final BCryptPasswordEncoder passwordEncoder;
     private final UserJpaRepository userJpaRepository;
     private final AuthenticationManager authenticationManager;
+    private final JavaMailSender javaMailSender;
+    private final PasswordResetTokenJpaRepository passwordResetTokenJpaRepository;
 
     public ResponseSignUpUser signUpUser(RequestSignUpUser requestSignUpUser) throws AppException {
         String email = requestSignUpUser.getEmail();
@@ -121,5 +132,56 @@ public class AuthenticationService {
         if (!password.equals(confirmPassword)) {
             throw new AppException(AuthenticationErrorCode.PASSWORD_MISMATCH);
         }
+    }
+
+    public ResponseStartForgotPassword startForgotPassword(RequestStartForgotPassword requestStartForgotPassword) throws AppException {
+        String email = requestStartForgotPassword.getEmail();
+        UserEntity userEntity = userJpaRepository.findByEmail(email).orElseThrow(() -> {
+            log.error("User not found with email: {}", email);
+            return new AppException(AuthenticationErrorCode.USER_NOT_FOUND);
+        });
+
+        String token = UUID.randomUUID().toString();
+
+        createPasswordResetToken(userEntity, token);
+        sendPasswordResetEmail(userEntity, token);
+
+        return ResponseStartForgotPassword.builder()
+                .emailSent(true)
+                .build();
+    }
+
+    private void sendPasswordResetEmail(UserEntity userEntity, String token) {
+        String email = userEntity.getEmail();
+        String subject = "Password Reset Request";
+        String message = getMessage(userEntity, token);
+
+        SimpleMailMessage emailMessage = new SimpleMailMessage();
+        emailMessage.setTo(email);
+        emailMessage.setSubject(subject);
+        emailMessage.setText(message);
+        javaMailSender.send(emailMessage);
+
+        log.info("Password reset email sent to: {}", email);
+    }
+
+    private static String getMessage(UserEntity userEntity, String token) {
+        String resetLink = String.format("http://localhost:8080/reset-password?token=%s", token);
+
+        return String.format("Hello %s,\n\n" +
+                        "You have requested to reset your password. Please click the link below to reset your password:\n" +
+                        "%s\n\n" +
+                        "If you did not request this, please ignore this email.\n\n" +
+                        "Best regards,\n" +
+                        "GuessBuddy Team",
+                userEntity.getUsername(), resetLink);
+    }
+
+    private void createPasswordResetToken(UserEntity userEntity, String token) {
+        Optional<PasswordResetTokenEntity> passwordResetTokenEntityOptional = passwordResetTokenJpaRepository.findByUserEntity_Id(userEntity.getId());
+        PasswordResetTokenEntity passwordResetTokenEntity = passwordResetTokenEntityOptional.orElseGet(PasswordResetTokenEntity::new);
+        passwordResetTokenEntity.setToken(token);
+        passwordResetTokenEntity.setUserEntity(userEntity);
+        passwordResetTokenJpaRepository.save(passwordResetTokenEntity);
     }
 }

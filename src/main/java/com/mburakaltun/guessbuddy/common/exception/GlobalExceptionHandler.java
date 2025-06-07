@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler {
 
     private final MessageSource messageSource;
-    private final String SYSTEM_ERROR_MESSAGE_KEY = "SYSTEM_0000";
+    private static final String SYSTEM_ERROR_MESSAGE_KEY = "SYSTEM_0000";
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiExceptionResponse> handleException(Exception exception, Locale locale) {

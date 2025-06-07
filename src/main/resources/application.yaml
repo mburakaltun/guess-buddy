@@ -52,6 +52,7 @@ authentication:
     - /authentication/sign-up
     - /authentication/sign-in
     - /authentication/start-forgot-password
+    - /authentication/complete-forgot-password
 
 management:
   endpoints:

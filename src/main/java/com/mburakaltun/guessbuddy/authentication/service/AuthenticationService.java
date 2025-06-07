@@ -11,6 +11,7 @@ import com.mburakaltun.guessbuddy.authentication.model.response.ResponseComplete
 import com.mburakaltun.guessbuddy.authentication.model.response.ResponseStartForgotPassword;
 import com.mburakaltun.guessbuddy.authentication.model.response.ResponseSignInUser;
 import com.mburakaltun.guessbuddy.authentication.model.response.ResponseSignUpUser;
+import com.mburakaltun.guessbuddy.authentication.properties.AuthenticationProperties;
 import com.mburakaltun.guessbuddy.authentication.repository.PasswordResetTokenJpaRepository;
 import com.mburakaltun.guessbuddy.user.repository.UserJpaRepository;
 import com.mburakaltun.guessbuddy.common.model.enums.AuthorizationRole;
@@ -18,6 +19,8 @@ import com.mburakaltun.guessbuddy.common.exception.AppException;
 import com.mburakaltun.guessbuddy.common.util.JwtUtility;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,6 +31,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -41,6 +45,8 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final JavaMailSender javaMailSender;
     private final PasswordResetTokenJpaRepository passwordResetTokenJpaRepository;
+    private final MessageSource messageSource;
+    private final AuthenticationProperties authenticationProperties;
 
     private static final long TOKEN_EXPIRY_MINUTES = 15L;
 
@@ -139,47 +145,45 @@ public class AuthenticationService {
         }
     }
 
-    public ResponseStartForgotPassword startForgotPassword(RequestStartForgotPassword requestStartForgotPassword) throws AppException {
-        String email = requestStartForgotPassword.getEmail();
-        UserEntity userEntity = userJpaRepository.findByEmail(email).orElseThrow(() -> {
-            log.error("User not found with email: {}", email);
-            return new AppException(AuthenticationErrorCode.USER_NOT_FOUND);
-        });
+    public ResponseStartForgotPassword startForgotPassword(RequestStartForgotPassword request) throws AppException {
+        String email = request.getEmail();
+        Locale locale = LocaleContextHolder.getLocale();
+
+        UserEntity userEntity = userJpaRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(AuthenticationErrorCode.USER_NOT_FOUND));
 
         String token = UUID.randomUUID().toString();
 
         createPasswordResetToken(userEntity, token);
-        sendPasswordResetEmail(userEntity, token);
+        sendPasswordResetEmail(userEntity, token, locale);
 
         return ResponseStartForgotPassword.builder()
                 .emailSent(true)
                 .build();
     }
 
-    private void sendPasswordResetEmail(UserEntity userEntity, String token) {
+    private void sendPasswordResetEmail(UserEntity userEntity, String token, Locale locale) {
         String email = userEntity.getEmail();
-        String subject = "Password Reset Request";
-        String message = getMessage(userEntity, token);
+        String subject = messageSource.getMessage("password.reset.subject", null, locale);
+        String message = getMessage(userEntity, token, locale);
 
         SimpleMailMessage emailMessage = new SimpleMailMessage();
         emailMessage.setTo(email);
         emailMessage.setSubject(subject);
         emailMessage.setText(message);
         javaMailSender.send(emailMessage);
-
-        log.info("Password reset email sent to: {}", email);
     }
 
-    private static String getMessage(UserEntity userEntity, String token) {
-        String resetLink = String.format("http://localhost:8080/reset-password?token=%s", token);
+    private String getMessage(UserEntity userEntity, String token, Locale locale) {
+        String resetPasswordDeepLinkUrl = String.format("%s?token=%s", authenticationProperties.getResetPasswordDeepLinkUrl(), token);
 
-        return String.format("Hello %s,\n\n" +
-                        "You have requested to reset your password. Please click the link below to reset your password:\n" +
-                        "%s\n\n" +
-                        "If you did not request this, please ignore this email.\n\n" +
-                        "Best regards,\n" +
-                        "GuessBuddy Team",
-                userEntity.getUsername(), resetLink);
+        return String.format("%s\n\n%s\n%s\n\n%s\n\n%s",
+                messageSource.getMessage("password.reset.greeting", new Object[]{userEntity.getUsername()}, locale),
+                messageSource.getMessage("password.reset.instruction", null, locale),
+                messageSource.getMessage("password.reset.link", new Object[]{resetPasswordDeepLinkUrl}, locale),
+                messageSource.getMessage("password.reset.ignore", null, locale),
+                messageSource.getMessage("password.reset.signature", null, locale)
+        );
     }
 
     private void createPasswordResetToken(UserEntity userEntity, String token) {

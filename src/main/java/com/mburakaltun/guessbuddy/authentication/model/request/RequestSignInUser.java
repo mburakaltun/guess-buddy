@@ -19,6 +19,5 @@ public class RequestSignInUser {
     private String email;
 
     @NotBlank(message = "{validation.password.notBlank}")
-    @Size(min = 8, message = "{validation.password.size}")
     private String password;
 }

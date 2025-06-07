@@ -11,4 +11,5 @@ import java.util.List;
 @ConfigurationProperties(prefix = "authentication")
 public class AuthenticationProperties {
     private List<String> whitelistedEndpoints;
+    private String resetPasswordDeepLinkUrl;
 }

@@ -1,9 +1,9 @@
 spring:
-  profiles:
-    active: prod
-  application:
-    name: guessBuddy
   datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       maximum-pool-size: 10
       minimum-idle: 5
@@ -11,6 +11,14 @@ spring:
       max-lifetime: 1800000 # 30 minutes
       connection-timeout: 20000 # 20 seconds
       schema: app
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+  profiles:
+    active: prod
+  application:
+    name: guessBuddy
   jpa:
     hibernate:
       ddl-auto: update

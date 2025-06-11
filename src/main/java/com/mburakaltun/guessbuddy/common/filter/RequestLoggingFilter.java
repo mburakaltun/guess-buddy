@@ -31,22 +31,22 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        long startTime = System.currentTimeMillis();
+
         ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request);
         ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper(response);
-        long startTime = System.currentTimeMillis();
 
         try {
             filterChain.doFilter(wrappedRequest, wrappedResponse);
         } finally {
-            long duration = System.currentTimeMillis() - startTime;
-
             String requestHeaders = getHeaders(wrappedRequest);
             String requestBody = getRequestBody(wrappedRequest);
             String responseBody = getResponseBody(wrappedResponse);
 
-            logRequestResponse(wrappedRequest, wrappedResponse, requestBody, responseBody, requestHeaders, duration);
-
             wrappedResponse.copyBodyToResponse();
+
+            long duration = System.currentTimeMillis() - startTime;
+            logRequestResponse(wrappedRequest, wrappedResponse, requestBody, responseBody, requestHeaders, duration);
         }
     }
 

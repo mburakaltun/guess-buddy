@@ -2,7 +2,7 @@ package com.mburakaltun.guessbuddy.prediction.service;
 
 import com.mburakaltun.guessbuddy.authentication.model.entity.UserEntity;
 import com.mburakaltun.guessbuddy.authentication.model.enums.AuthenticationErrorCode;
-import com.mburakaltun.guessbuddy.common.constants.CacheNames;
+import com.mburakaltun.guessbuddy.prediction.contants.PredictionCacheNames;
 import com.mburakaltun.guessbuddy.prediction.model.dto.UserPredictionHitRateDto;
 import com.mburakaltun.guessbuddy.prediction.model.request.RequestGetUserPredictionRates;
 import com.mburakaltun.guessbuddy.prediction.model.request.RequestGetUserPredictions;
@@ -44,7 +44,7 @@ public class PredictionService {
     private final VoteJpaRepository voteJpaRepository;
     private final UserJpaRepository userJpaRepository;
 
-    @CacheEvict(cacheNames = {CacheNames.PREDICTIONS, CacheNames.USER_PREDICTIONS, CacheNames.PREDICTION_RATES}, allEntries = true)
+    @CacheEvict(cacheNames = {PredictionCacheNames.PREDICTIONS, PredictionCacheNames.USER_PREDICTIONS, PredictionCacheNames.PREDICTION_RATES}, allEntries = true)
     public ResponseCreatePrediction createPrediction(RequestCreatePrediction requestCreatePrediction, String userId) throws AppException {
         Optional<UserEntity> userEntityOptional = userJpaRepository.findById(Long.parseLong(userId));
         if (userEntityOptional.isEmpty()) {
@@ -62,7 +62,7 @@ public class PredictionService {
                 .build();
     }
 
-    @Cacheable(cacheNames = CacheNames.PREDICTIONS, key = "'predictions_' + #userId + '_' + #requestGetPredictions.page + '_' + #requestGetPredictions.size")
+    @Cacheable(cacheNames = PredictionCacheNames.PREDICTIONS, key = "'predictions_' + #userId + '_' + #requestGetPredictions.page + '_' + #requestGetPredictions.size")
     public ResponseGetPredictions getPredictions(RequestGetPredictions requestGetPredictions, Long userId) {
         int page = requestGetPredictions.getPage();
         int size = requestGetPredictions.getSize();
@@ -98,7 +98,7 @@ public class PredictionService {
         return userVotesMap;
     }
 
-    @Cacheable(cacheNames = CacheNames.PREDICTION_RATES, key = "'prediction_rates_' + #requestGetUserPredictionRates.page + '_' + #requestGetUserPredictionRates.size")
+    @Cacheable(cacheNames = PredictionCacheNames.PREDICTION_RATES, key = "'prediction_rates_' + #requestGetUserPredictionRates.page + '_' + #requestGetUserPredictionRates.size")
     public ResponseGetUserPredictionRates getUserPredictionRates(RequestGetUserPredictionRates requestGetUserPredictionRates) {
         int page = requestGetUserPredictionRates.getPage();
         int size = requestGetUserPredictionRates.getSize();
@@ -115,7 +115,7 @@ public class PredictionService {
                 .build();
     }
 
-    @Cacheable(cacheNames = CacheNames.USER_PREDICTIONS, key = "'user_predictions_' + #userId + '_' + #requestGetUserPredictions.page + '_' + #requestGetUserPredictions.size")
+    @Cacheable(cacheNames = PredictionCacheNames.USER_PREDICTIONS, key = "'user_predictions_' + #userId + '_' + #requestGetUserPredictions.page + '_' + #requestGetUserPredictions.size")
     public ResponseGetUserPredictions getUserPredictions(RequestGetUserPredictions requestGetUserPredictions, Long userId) {
         int page = requestGetUserPredictions.getPage();
         int size = requestGetUserPredictions.getSize();

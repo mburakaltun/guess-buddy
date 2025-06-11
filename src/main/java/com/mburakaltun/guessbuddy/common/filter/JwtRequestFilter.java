@@ -63,10 +63,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         if (unauthorized) {
             readRequestBody(wrappedRequest);
-            long duration = System.currentTimeMillis() - startTime;
-            createRequestLog(wrappedRequest, wrappedResponse, HttpServletResponse.SC_UNAUTHORIZED, duration);
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             wrappedResponse.copyBodyToResponse();
+
+            long duration = System.currentTimeMillis() - startTime;
+            createRequestLog(wrappedRequest, wrappedResponse, HttpServletResponse.SC_UNAUTHORIZED, duration);
             return;
         }
 

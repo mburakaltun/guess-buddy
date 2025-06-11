@@ -1,7 +1,7 @@
 package com.mburakaltun.guessbuddy.vote.service;
 
-import com.mburakaltun.guessbuddy.common.constants.CacheNames;
 import com.mburakaltun.guessbuddy.common.exception.AppException;
+import com.mburakaltun.guessbuddy.prediction.contants.PredictionCacheNames;
 import com.mburakaltun.guessbuddy.prediction.model.entity.PredictionEntity;
 import com.mburakaltun.guessbuddy.prediction.model.enums.PredictionErrorCode;
 import com.mburakaltun.guessbuddy.prediction.repository.PredictionJpaRepository;
@@ -9,6 +9,7 @@ import com.mburakaltun.guessbuddy.vote.model.entity.VoteEntity;
 import com.mburakaltun.guessbuddy.vote.model.request.RequestVotePrediction;
 import com.mburakaltun.guessbuddy.vote.repository.VoteJpaRepository;
 import com.mburakaltun.guessbuddy.vote.response.ResponseVotePrediction;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
@@ -23,7 +24,8 @@ public class VoteService {
     private final VoteJpaRepository voteJpaRepository;
     private final PredictionJpaRepository predictionJpaRepository;
 
-    @CacheEvict(cacheNames = {CacheNames.PREDICTIONS, CacheNames.USER_PREDICTIONS, CacheNames.PREDICTION_RATES}, allEntries = true)
+    @Transactional
+    @CacheEvict(cacheNames = {PredictionCacheNames.PREDICTIONS, PredictionCacheNames.USER_PREDICTIONS, PredictionCacheNames.PREDICTION_RATES}, allEntries = true)
     public ResponseVotePrediction createVote(@Valid RequestVotePrediction requestVotePrediction, String userId) throws AppException {
         PredictionEntity predictionEntity = predictionJpaRepository.findById(requestVotePrediction.getPredictionId())
                 .orElseThrow(() -> new AppException(PredictionErrorCode.PREDICTION_NOT_FOUND));

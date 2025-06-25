@@ -1,5 +1,6 @@
 package com.mburakaltun.guessbuddy.common.converter;
 
+import com.mburakaltun.guessbuddy.common.model.enums.Status;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 

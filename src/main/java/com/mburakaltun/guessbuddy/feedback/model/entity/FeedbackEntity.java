@@ -2,6 +2,7 @@ package com.mburakaltun.guessbuddy.feedback.model.entity;
 
 import com.mburakaltun.guessbuddy.common.model.entity.BaseEntity;
 import com.mburakaltun.guessbuddy.feedback.model.converter.FeedbackCategoryConverter;
+import com.mburakaltun.guessbuddy.feedback.model.enums.FeedbackCategory;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -19,7 +20,7 @@ public class FeedbackEntity extends BaseEntity {
 
     @Convert(converter = FeedbackCategoryConverter.class)
     @Column(nullable = false)
-    private String category;
+    private FeedbackCategory category;
 
     @Column(nullable = false)
     private Long userId;

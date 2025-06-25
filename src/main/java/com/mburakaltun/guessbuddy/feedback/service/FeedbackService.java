@@ -22,6 +22,7 @@ public class FeedbackService {
         feedbackJpaRepository.save(feedbackEntity);
 
         return ResponseSubmitFeedback.builder()
+                .userId(userId)
                 .build();
     }
 }

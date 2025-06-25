@@ -1,5 +1,6 @@
 package com.mburakaltun.guessbuddy.feedback.model.request;
 
+import com.mburakaltun.guessbuddy.feedback.model.enums.FeedbackCategory;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
@@ -12,5 +13,5 @@ public class RequestSubmitFeedback {
     @Size(max = 1000, message = "{validation.feedback.content.size}")
     private String content;
 
-    private String category;
+    private FeedbackCategory category;
 }

@@ -45,8 +45,8 @@ public class PredictionService {
     private final UserJpaRepository userJpaRepository;
 
     @CacheEvict(cacheNames = {PredictionCacheNames.PREDICTIONS, PredictionCacheNames.USER_PREDICTIONS, PredictionCacheNames.PREDICTION_RATES}, allEntries = true)
-    public ResponseCreatePrediction createPrediction(RequestCreatePrediction requestCreatePrediction, String userId) throws AppException {
-        Optional<UserEntity> userEntityOptional = userJpaRepository.findById(Long.parseLong(userId));
+    public ResponseCreatePrediction createPrediction(RequestCreatePrediction requestCreatePrediction, Long userId) throws AppException {
+        Optional<UserEntity> userEntityOptional = userJpaRepository.findById(userId);
         if (userEntityOptional.isEmpty()) {
             throw new AppException(AuthenticationErrorCode.USER_NOT_FOUND);
         }

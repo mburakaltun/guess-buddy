@@ -16,6 +16,7 @@ import com.mburakaltun.guessbuddy.user.model.response.ResponseGetUserProfile;
 import com.mburakaltun.guessbuddy.user.repository.UserJpaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -40,8 +41,9 @@ public class UserService {
     }
 
     @Transactional
-    public ResponseChangeUsername changeUsername(RequestChangeUsername request, String userId) throws AppException {
-        UserEntity userEntity = userJpaRepository.findById(Long.valueOf(userId)).orElseThrow(() -> new AppException(UserErrorCode.USER_NOT_FOUND));
+    @CacheEvict(cacheNames = UserCacheNames.USER_PROFILE, key = "#userId")
+    public ResponseChangeUsername changeUsername(RequestChangeUsername request, Long userId) throws AppException {
+        UserEntity userEntity = userJpaRepository.findById(userId).orElseThrow(() -> new AppException(UserErrorCode.USER_NOT_FOUND));
 
         String newUsername = request.getNewUsername();
         validateUsername(newUsername, userEntity.getId());
@@ -55,12 +57,12 @@ public class UserService {
                 .build();
     }
 
-    public ResponseChangePassword changePassword(RequestChangePassword requestChangePassword, String userId) throws AppException {
+    public ResponseChangePassword changePassword(RequestChangePassword requestChangePassword, Long userId) throws AppException {
         if (!requestChangePassword.getNewPassword().equals(requestChangePassword.getConfirmNewPassword())) {
             throw new AppException(UserErrorCode.PASSWORD_MISMATCH);
         }
 
-        UserEntity userEntity = userJpaRepository.findById(Long.valueOf(userId)).orElseThrow(() -> new AppException(UserErrorCode.USER_NOT_FOUND));
+        UserEntity userEntity = userJpaRepository.findById(userId).orElseThrow(() -> new AppException(UserErrorCode.USER_NOT_FOUND));
         boolean isPasswordCorrect = passwordEncoder.matches(requestChangePassword.getCurrentPassword(), userEntity.getEncodedPassword());
 
         if (!isPasswordCorrect) {
@@ -76,14 +78,15 @@ public class UserService {
     }
 
     @Transactional
-    public ResponseDeleteUser deleteUser(String userId) throws AppException {
-        UserEntity userEntity = userJpaRepository.findById(Long.valueOf(userId)).orElseThrow(() -> new AppException(UserErrorCode.USER_NOT_FOUND));
+    @CacheEvict(cacheNames = UserCacheNames.USER_PROFILE, key = "#userId")
+    public ResponseDeleteUser deleteUser(Long userId) throws AppException {
+        UserEntity userEntity = userJpaRepository.findById(userId).orElseThrow(() -> new AppException(UserErrorCode.USER_NOT_FOUND));
 
         userEntity.setStatus(Status.DELETED);
         userJpaRepository.save(userEntity);
 
         return ResponseDeleteUser.builder()
-                .userId(Long.valueOf(userId))
+                .userId(userId)
                 .build();
     }
 

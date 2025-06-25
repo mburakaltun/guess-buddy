@@ -33,16 +33,16 @@ public class PredictionController extends BaseController {
     private final PredictionService predictionService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<ResponseCreatePrediction>> createQuote(@RequestHeader(AppHeaders.X_USER_ID) String userId,
+    public ResponseEntity<ApiResponse<ResponseCreatePrediction>> createQuote(@RequestHeader(AppHeaders.X_USER_ID) Long userId,
                                                                              @RequestBody @Valid RequestCreatePrediction requestCreatePrediction) throws AppException {
         ResponseCreatePrediction response = predictionService.createPrediction(requestCreatePrediction, userId);
         return new ResponseEntity<>(respond(response), HttpStatus.CREATED);
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<ResponseGetPredictions>> getPredictions(@RequestHeader(value = AppHeaders.X_USER_ID) String userId,
+    public ResponseEntity<ApiResponse<ResponseGetPredictions>> getPredictions(@RequestHeader(value = AppHeaders.X_USER_ID) Long userId,
                                                                               @ModelAttribute @Valid RequestGetPredictions requestGetPredictions) {
-        ResponseGetPredictions response = predictionService.getPredictions(requestGetPredictions, Long.valueOf(userId));
+        ResponseGetPredictions response = predictionService.getPredictions(requestGetPredictions, userId);
         return new ResponseEntity<>(respond(response), HttpStatus.OK);
     }
 
@@ -53,9 +53,9 @@ public class PredictionController extends BaseController {
     }
 
     @GetMapping("/my-predictions")
-    public ResponseEntity<ApiResponse<ResponseGetUserPredictions>> getUserPredictions(@RequestHeader(AppHeaders.X_USER_ID) String userId,
+    public ResponseEntity<ApiResponse<ResponseGetUserPredictions>> getUserPredictions(@RequestHeader(AppHeaders.X_USER_ID) Long userId,
                                                                                       @ModelAttribute RequestGetUserPredictions requestGetUserPredictions) throws AppException {
-        ResponseGetUserPredictions response = predictionService.getUserPredictions(requestGetUserPredictions, Long.valueOf(userId));
+        ResponseGetUserPredictions response = predictionService.getUserPredictions(requestGetUserPredictions, userId);
         return ResponseEntity.ok(respond(response));
     }
 }

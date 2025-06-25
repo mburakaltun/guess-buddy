@@ -31,28 +31,28 @@ public class UserController extends BaseController {
     private final UserService userService;
 
     @GetMapping("/profile")
-    public ResponseEntity<ApiResponse<ResponseGetUserProfile>> getUserProfile(@RequestHeader(AppHeaders.X_USER_ID) String userId,
+    public ResponseEntity<ApiResponse<ResponseGetUserProfile>> getUserProfile(@RequestHeader(AppHeaders.X_USER_ID) Long userId,
                                                                               @ModelAttribute RequestGetUserProfile requestGetUserProfile) throws AppException {
-        ResponseGetUserProfile response = userService.getUserProfile(requestGetUserProfile, Long.valueOf(userId));
+        ResponseGetUserProfile response = userService.getUserProfile(requestGetUserProfile, userId);
         return ResponseEntity.ok(respond(response));
     }
 
     @PutMapping("/username")
-    public ResponseEntity<ApiResponse<ResponseChangeUsername>> changeUsername(@RequestHeader(AppHeaders.X_USER_ID) String userId,
+    public ResponseEntity<ApiResponse<ResponseChangeUsername>> changeUsername(@RequestHeader(AppHeaders.X_USER_ID) Long userId,
                                                                               @Valid @RequestBody RequestChangeUsername requestChangeUsername) throws AppException {
         ResponseChangeUsername response = userService.changeUsername(requestChangeUsername, userId);
         return ResponseEntity.ok(respond(response));
     }
 
     @PutMapping("/password")
-    public ResponseEntity<ApiResponse<ResponseChangePassword>> changePassword(@RequestHeader(AppHeaders.X_USER_ID) String userId,
+    public ResponseEntity<ApiResponse<ResponseChangePassword>> changePassword(@RequestHeader(AppHeaders.X_USER_ID) Long userId,
                                                                               @Valid @RequestBody RequestChangePassword requestChangePassword) throws AppException {
         ResponseChangePassword response = userService.changePassword(requestChangePassword, userId);
         return ResponseEntity.ok(respond(response));
     }
 
     @DeleteMapping
-    public ResponseEntity<ApiResponse<ResponseDeleteUser>> deleteUser(@RequestHeader(AppHeaders.X_USER_ID) String userId) throws AppException {
+    public ResponseEntity<ApiResponse<ResponseDeleteUser>> deleteUser(@RequestHeader(AppHeaders.X_USER_ID) Long userId) throws AppException {
         ResponseDeleteUser response = userService.deleteUser(userId);
         return ResponseEntity.ok(respond(response));
     }

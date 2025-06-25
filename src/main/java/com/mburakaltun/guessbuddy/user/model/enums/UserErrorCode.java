@@ -8,7 +8,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum UserErrorCode implements ErrorCode {
     USER_NOT_FOUND("USER_0001"),
-    USERNAME_ALREADY_EXISTS("USER_0002");
+    USERNAME_ALREADY_EXISTS("USER_0002"),
+    PASSWORD_INCORRECT("USER_0003"),
+    PASSWORD_MISMATCH("USER_0004");
 
     private final String code;
 }

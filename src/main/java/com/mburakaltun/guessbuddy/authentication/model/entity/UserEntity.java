@@ -1,5 +1,6 @@
 package com.mburakaltun.guessbuddy.authentication.model.entity;
 
+import com.mburakaltun.guessbuddy.common.model.entity.BaseStatusEntity;
 import com.mburakaltun.guessbuddy.common.model.enums.AuthorizationRole;
 import com.mburakaltun.guessbuddy.common.model.entity.BaseEntity;
 import jakarta.persistence.Column;
@@ -14,7 +15,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "app_user")
-public class UserEntity extends BaseEntity {
+public class UserEntity extends BaseStatusEntity {
     @Column(nullable = false, unique = true)
     private String email;
 

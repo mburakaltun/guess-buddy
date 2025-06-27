@@ -7,11 +7,9 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class ResponseSignInUser {
-    private String authenticationToken;
-    private String refreshToken;
-    private String userId;
-    private String username;
+@AllArgsConstructor
+public class ResponseSignOutUser {
+    private boolean success;
+    private String message;
 }

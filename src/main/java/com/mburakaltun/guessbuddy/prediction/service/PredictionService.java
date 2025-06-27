@@ -2,7 +2,6 @@ package com.mburakaltun.guessbuddy.prediction.service;
 
 import com.mburakaltun.guessbuddy.authentication.model.entity.UserEntity;
 import com.mburakaltun.guessbuddy.authentication.model.enums.AuthenticationErrorCode;
-import com.mburakaltun.guessbuddy.prediction.contants.PredictionCacheNames;
 import com.mburakaltun.guessbuddy.prediction.model.dto.UserPredictionHitRateDto;
 import com.mburakaltun.guessbuddy.prediction.model.request.RequestGetUserPredictionRates;
 import com.mburakaltun.guessbuddy.prediction.model.request.RequestGetUserPredictions;
@@ -21,8 +20,6 @@ import com.mburakaltun.guessbuddy.prediction.utility.PredictionMapper;
 import com.mburakaltun.guessbuddy.vote.model.entity.VoteEntity;
 import com.mburakaltun.guessbuddy.vote.repository.VoteJpaRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;

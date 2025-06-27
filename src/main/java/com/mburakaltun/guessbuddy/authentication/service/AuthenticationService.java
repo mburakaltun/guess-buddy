@@ -1,13 +1,18 @@
 package com.mburakaltun.guessbuddy.authentication.service;
 
 import com.mburakaltun.guessbuddy.authentication.model.entity.PasswordResetTokenEntity;
+import com.mburakaltun.guessbuddy.authentication.model.entity.RefreshTokenEntity;
 import com.mburakaltun.guessbuddy.authentication.model.entity.UserEntity;
 import com.mburakaltun.guessbuddy.authentication.model.enums.AuthenticationErrorCode;
 import com.mburakaltun.guessbuddy.authentication.model.request.RequestCompleteForgotPassword;
+import com.mburakaltun.guessbuddy.authentication.model.request.RequestRefreshToken;
+import com.mburakaltun.guessbuddy.authentication.model.request.RequestSignOutUser;
 import com.mburakaltun.guessbuddy.authentication.model.request.RequestStartForgotPassword;
 import com.mburakaltun.guessbuddy.authentication.model.request.RequestSignInUser;
 import com.mburakaltun.guessbuddy.authentication.model.request.RequestSignUpUser;
 import com.mburakaltun.guessbuddy.authentication.model.response.ResponseCompleteForgotPassword;
+import com.mburakaltun.guessbuddy.authentication.model.response.ResponseRefreshToken;
+import com.mburakaltun.guessbuddy.authentication.model.response.ResponseSignOutUser;
 import com.mburakaltun.guessbuddy.authentication.model.response.ResponseStartForgotPassword;
 import com.mburakaltun.guessbuddy.authentication.model.response.ResponseSignInUser;
 import com.mburakaltun.guessbuddy.authentication.model.response.ResponseSignUpUser;
@@ -45,6 +50,7 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final JavaMailSender javaMailSender;
     private final PasswordResetTokenJpaRepository passwordResetTokenJpaRepository;
+    private final RefreshTokenService refreshTokenService;
     private final MessageSource messageSource;
     private final AuthenticationProperties authenticationProperties;
 
@@ -84,11 +90,30 @@ public class AuthenticationService {
         AuthorizationRole role = generateRole(authentication);
         String authenticationToken = JwtUtility.generateToken(email, role);
 
-        log.info("User signed in successfully with email: {}", email);
+        RefreshTokenEntity refreshTokenEntity = refreshTokenService.createRefreshToken(userEntity.getId());
+
         return ResponseSignInUser.builder()
                 .authenticationToken(authenticationToken)
+                .refreshToken(refreshTokenEntity.getToken())
                 .userId(String.valueOf(userEntity.getId()))
                 .username(userEntity.getUsername())
+                .build();
+    }
+
+    public ResponseRefreshToken refreshToken(RequestRefreshToken requestRefreshToken) throws AppException {
+        String refreshToken = requestRefreshToken.getRefreshToken();
+
+        RefreshTokenEntity refreshTokenEntity = refreshTokenService.validateRefreshToken(refreshToken);
+        UserEntity userEntity = refreshTokenEntity.getUser();
+
+        String accessToken = JwtUtility.generateAccessTokenFromRefreshToken(userEntity.getEmail(), userEntity.getRole());
+
+        refreshTokenService.deleteRefreshToken(refreshToken);
+        RefreshTokenEntity newRefreshTokenEntity = refreshTokenService.createRefreshToken(userEntity.getId());
+
+        return ResponseRefreshToken.builder()
+                .accessToken(accessToken)
+                .refreshToken(newRefreshTokenEntity.getToken())
                 .build();
     }
 
@@ -222,5 +247,17 @@ public class AuthenticationService {
             throw new AppException(AuthenticationErrorCode.TOKEN_EXPIRED);
         }
         return passwordResetTokenEntity;
+    }
+
+    public ResponseSignOutUser signOutUser(RequestSignOutUser requestSignOutUser, Long userId) throws AppException {
+        UserEntity userEntity = userJpaRepository.findById(userId)
+                .orElseThrow(() -> new AppException(AuthenticationErrorCode.USER_NOT_FOUND));
+
+        refreshTokenService.deleteAllUserRefreshTokens(userId);
+
+        return ResponseSignOutUser.builder()
+                .success(true)
+                .message("Successfully signed out")
+                .build();
     }
 }

@@ -1,4 +1,4 @@
-package com.mburakaltun.guessbuddy.prediction.contants;
+package com.mburakaltun.guessbuddy.prediction.constants;
 
 public class PredictionCacheNames {
     public static final String PREDICTIONS = "predictions";

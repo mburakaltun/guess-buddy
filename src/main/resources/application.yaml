@@ -62,6 +62,7 @@ authentication:
     - /authentication/sign-in
     - /authentication/start-forgot-password
     - /authentication/complete-forgot-password
+    - /authentication/refresh-token
 
 management:
   endpoints:

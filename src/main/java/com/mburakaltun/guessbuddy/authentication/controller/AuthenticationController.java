@@ -1,14 +1,19 @@
 package com.mburakaltun.guessbuddy.authentication.controller;
 
 import com.mburakaltun.guessbuddy.authentication.model.request.RequestCompleteForgotPassword;
+import com.mburakaltun.guessbuddy.authentication.model.request.RequestRefreshToken;
+import com.mburakaltun.guessbuddy.authentication.model.request.RequestSignOutUser;
 import com.mburakaltun.guessbuddy.authentication.model.request.RequestStartForgotPassword;
 import com.mburakaltun.guessbuddy.authentication.model.request.RequestSignInUser;
 import com.mburakaltun.guessbuddy.authentication.model.request.RequestSignUpUser;
 import com.mburakaltun.guessbuddy.authentication.model.response.ResponseCompleteForgotPassword;
+import com.mburakaltun.guessbuddy.authentication.model.response.ResponseRefreshToken;
+import com.mburakaltun.guessbuddy.authentication.model.response.ResponseSignOutUser;
 import com.mburakaltun.guessbuddy.authentication.model.response.ResponseStartForgotPassword;
 import com.mburakaltun.guessbuddy.authentication.model.response.ResponseSignInUser;
 import com.mburakaltun.guessbuddy.authentication.model.response.ResponseSignUpUser;
 import com.mburakaltun.guessbuddy.authentication.service.AuthenticationService;
+import com.mburakaltun.guessbuddy.common.constants.AppHeaders;
 import com.mburakaltun.guessbuddy.common.controller.BaseController;
 import com.mburakaltun.guessbuddy.common.exception.AppException;
 import com.mburakaltun.guessbuddy.common.model.response.ApiResponse;
@@ -18,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -51,5 +57,17 @@ public class AuthenticationController extends BaseController {
         ResponseCompleteForgotPassword response = authenticationService.completeForgotPassword(requestCompleteForgotPassword);
         return ResponseEntity.ok(respond(response));
     }
-}
 
+    @PostMapping("/refresh-token")
+    public ResponseEntity<ApiResponse<ResponseRefreshToken>> refreshToken(@Valid @RequestBody RequestRefreshToken requestRefreshToken) throws AppException {
+        ResponseRefreshToken response = authenticationService.refreshToken(requestRefreshToken);
+        return ResponseEntity.ok(respond(response));
+    }
+
+    @PostMapping("/sign-out")
+    public ResponseEntity<ApiResponse<ResponseSignOutUser>> signOut(@RequestHeader(AppHeaders.X_USER_ID) Long userId,
+                                                                    @RequestBody RequestSignOutUser requestSignOutUser) throws AppException {
+        ResponseSignOutUser response = authenticationService.signOutUser(requestSignOutUser, userId);
+        return ResponseEntity.ok(respond(response));
+    }
+}

@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.UUID;
 
 @Slf4j
 @UtilityClass
@@ -20,6 +21,9 @@ public class JwtUtility {
         put(AuthorizationRole.ROLE_STANDARD_USER, 1);
         put(AuthorizationRole.ROLE_ADMIN, 720);
     }};
+
+    // Refresh token expiration in days
+    private final int REFRESH_TOKEN_EXPIRATION_DAYS = 30;
 
     public String generateToken(String email, AuthorizationRole role) {
         Date now = new Date();
@@ -80,5 +84,16 @@ public class JwtUtility {
         String extractedUsername = extractUsername(token);
         return username.equals(extractedUsername);
     }
-}
 
+    public String generateRefreshToken() {
+        return UUID.randomUUID().toString();
+    }
+
+    public LocalDateTime calculateRefreshTokenExpiryDate() {
+        return LocalDateTime.now().plusDays(REFRESH_TOKEN_EXPIRATION_DAYS);
+    }
+
+    public String generateAccessTokenFromRefreshToken(String email, AuthorizationRole role) {
+        return generateToken(email, role);
+    }
+}

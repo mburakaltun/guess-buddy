@@ -1,7 +1,7 @@
 package com.mburakaltun.guessbuddy.vote.service;
 
 import com.mburakaltun.guessbuddy.common.exception.AppException;
-import com.mburakaltun.guessbuddy.prediction.contants.PredictionCacheNames;
+import com.mburakaltun.guessbuddy.prediction.constants.PredictionCacheNames;
 import com.mburakaltun.guessbuddy.prediction.model.entity.PredictionEntity;
 import com.mburakaltun.guessbuddy.prediction.model.enums.PredictionErrorCode;
 import com.mburakaltun.guessbuddy.prediction.repository.PredictionJpaRepository;

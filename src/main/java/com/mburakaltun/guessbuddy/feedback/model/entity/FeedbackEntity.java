@@ -1,6 +1,5 @@
 package com.mburakaltun.guessbuddy.feedback.model.entity;
 
-import com.mburakaltun.guessbuddy.common.model.entity.BaseEntity;
 import com.mburakaltun.guessbuddy.common.model.entity.BaseStatusEntity;
 import com.mburakaltun.guessbuddy.feedback.model.converter.FeedbackCategoryConverter;
 import com.mburakaltun.guessbuddy.feedback.model.enums.FeedbackCategory;
@@ -22,7 +21,7 @@ public class FeedbackEntity extends BaseStatusEntity {
     private String content;
 
     @Convert(converter = FeedbackCategoryConverter.class)
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "INTEGER COMMENT 'Feedback category code: 1=SUGGESTION, 2=BUG_REPORT, 3=QUESTION, 4=OTHER'")
     private FeedbackCategory category;
 
     @Column(nullable = false)

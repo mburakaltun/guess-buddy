@@ -38,6 +38,18 @@ spring:
           auth: true
           starttls:
             enable: true
+  # Scheduler configuration
+  task:
+    scheduling:
+      pool:
+        size: 5
+      thread-name-prefix: scheduled-task-
+    execution:
+      pool:
+        core-size: 10
+        max-size: 20
+        queue-capacity: 100
+      thread-name-prefix: async-task-
 
 logging:
   level:

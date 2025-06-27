@@ -1,0 +1,39 @@
+package com.mburakaltun.guessbuddy.common.model.entity;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.experimental.SuperBuilder;
+
+/**
+ * Entity for storing historical request logs.
+ * This table is used to archive request logs from the main request_log table.
+ */
+@Getter
+@Setter
+@Entity
+@NoArgsConstructor
+@AllArgsConstructor
+@SuperBuilder
+@Table(name = "request_log_history")
+public class RequestLogHistoryEntity extends BaseEntity {
+    private Long responseTime;
+    private Integer responseStatus;
+    private String requestMethod;
+    private String requestUrl;
+
+    @Column(columnDefinition = "TEXT")
+    private String requestHeaders;
+
+    @Column(columnDefinition = "TEXT")
+    private String requestPayload;
+
+    @Column(columnDefinition = "TEXT")
+    private String responsePayload;
+
+    private String requestIp;
+}

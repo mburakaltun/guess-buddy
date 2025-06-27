@@ -53,6 +53,12 @@ public class VoteService {
 
         return ResponseVotePrediction.builder()
                 .isVotedSuccessfully(true)
+                .averageScore(getAverageScore(predictionEntity))
+                .voteCount(predictionEntity.getVoteCount())
                 .build();
+    }
+
+    private double getAverageScore(PredictionEntity predictionEntity) {
+        return (double) predictionEntity.getTotalScore() / predictionEntity.getVoteCount();
     }
 }

@@ -7,4 +7,6 @@ import lombok.Data;
 @Builder
 public class ResponseVotePrediction {
     private Boolean isVotedSuccessfully;
+    private double averageScore;
+    private long voteCount;
 }

@@ -5,24 +5,27 @@ import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
 @Converter(autoApply = true)
-public class FeedbackCategoryConverter implements AttributeConverter<FeedbackCategory, String> {
+public class FeedbackCategoryConverter implements AttributeConverter<FeedbackCategory, Integer> {
     @Override
-    public String convertToDatabaseColumn(FeedbackCategory category) {
+    public Integer convertToDatabaseColumn(FeedbackCategory category) {
         if (category == null) {
             return null;
         }
-        return category.name();
+        return category.getCode();
     }
 
     @Override
-    public FeedbackCategory convertToEntityAttribute(String dbData) {
-        if (dbData == null || dbData.isEmpty()) {
+    public FeedbackCategory convertToEntityAttribute(Integer dbData) {
+        if (dbData == null) {
             return null;
         }
-        try {
-            return FeedbackCategory.valueOf(dbData);
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Unknown database value: " + dbData, e);
+
+        for (FeedbackCategory category : FeedbackCategory.values()) {
+            if (category.getCode() == dbData) {
+                return category;
+            }
         }
+
+        throw new IllegalArgumentException("Unknown database value: " + dbData);
     }
 }

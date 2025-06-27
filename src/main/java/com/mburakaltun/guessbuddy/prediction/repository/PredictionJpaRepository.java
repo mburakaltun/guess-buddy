@@ -31,7 +31,6 @@ public interface PredictionJpaRepository extends JpaRepository<PredictionEntity,
     @Query("""
             SELECT p FROM PredictionEntity p
             WHERE p.creatorUser.id = :userId
-            AND p.voteCount > 0
             ORDER BY (CAST(p.totalScore AS float) / p.voteCount) DESC
             """)
     Page<PredictionEntity> findByCreatorUserIdOrderByAverageScore(
@@ -39,4 +38,5 @@ public interface PredictionJpaRepository extends JpaRepository<PredictionEntity,
             Pageable pageable
     );
 
+    List<PredictionEntity> findByCreatorUserId(Long userId);
 }

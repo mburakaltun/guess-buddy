@@ -1,6 +1,7 @@
 package com.mburakaltun.guessbuddy.feedback.model.entity;
 
 import com.mburakaltun.guessbuddy.common.model.entity.BaseEntity;
+import com.mburakaltun.guessbuddy.common.model.entity.BaseStatusEntity;
 import com.mburakaltun.guessbuddy.feedback.model.converter.FeedbackCategoryConverter;
 import com.mburakaltun.guessbuddy.feedback.model.enums.FeedbackCategory;
 import jakarta.persistence.Column;
@@ -9,12 +10,14 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.SQLRestriction;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "feedback")
-public class FeedbackEntity extends BaseEntity {
+@SQLRestriction("status != -1")
+public class FeedbackEntity extends BaseStatusEntity {
     @Column(nullable = false)
     private String content;
 

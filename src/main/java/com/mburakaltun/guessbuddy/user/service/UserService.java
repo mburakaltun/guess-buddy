@@ -4,6 +4,10 @@ import com.mburakaltun.guessbuddy.authentication.model.entity.UserEntity;
 import com.mburakaltun.guessbuddy.authentication.model.enums.AuthenticationErrorCode;
 import com.mburakaltun.guessbuddy.common.exception.AppException;
 import com.mburakaltun.guessbuddy.common.model.enums.Status;
+import com.mburakaltun.guessbuddy.feedback.model.entity.FeedbackEntity;
+import com.mburakaltun.guessbuddy.feedback.repository.FeedbackJpaRepository;
+import com.mburakaltun.guessbuddy.prediction.model.entity.PredictionEntity;
+import com.mburakaltun.guessbuddy.prediction.repository.PredictionJpaRepository;
 import com.mburakaltun.guessbuddy.user.constants.UserCacheNames;
 import com.mburakaltun.guessbuddy.user.model.enums.UserErrorCode;
 import com.mburakaltun.guessbuddy.user.model.request.RequestChangePassword;
@@ -14,6 +18,8 @@ import com.mburakaltun.guessbuddy.user.model.response.ResponseChangeUsername;
 import com.mburakaltun.guessbuddy.user.model.response.ResponseDeleteUser;
 import com.mburakaltun.guessbuddy.user.model.response.ResponseGetUserProfile;
 import com.mburakaltun.guessbuddy.user.repository.UserJpaRepository;
+import com.mburakaltun.guessbuddy.vote.model.entity.VoteEntity;
+import com.mburakaltun.guessbuddy.vote.repository.VoteJpaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -22,12 +28,17 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Slf4j
 @RequiredArgsConstructor
 @Service
 public class UserService {
     private final UserJpaRepository userJpaRepository;
     private final PasswordEncoder passwordEncoder;
+    private final VoteJpaRepository voteJpaRepository;
+    private final PredictionJpaRepository predictionJpaRepository;
+    private final FeedbackJpaRepository feedbackJpaRepository;
 
     @Cacheable(cacheNames = UserCacheNames.USER_PROFILE, key = "#userId")
     public ResponseGetUserProfile getUserProfile(RequestGetUserProfile requestGetUserProfile, Long userId) throws AppException {
@@ -82,12 +93,34 @@ public class UserService {
     public ResponseDeleteUser deleteUser(Long userId) throws AppException {
         UserEntity userEntity = userJpaRepository.findById(userId).orElseThrow(() -> new AppException(UserErrorCode.USER_NOT_FOUND));
 
+        deleteVotes(userId);
+        deletePredictions(userId);
+        deleteFeedbacks(userId);
+
         userEntity.setStatus(Status.DELETED);
         userJpaRepository.save(userEntity);
 
         return ResponseDeleteUser.builder()
                 .userId(userId)
                 .build();
+    }
+
+    private void deleteFeedbacks(Long userId) {
+        List<FeedbackEntity> feedbackEntityList = feedbackJpaRepository.findByUserId(userId);
+        feedbackEntityList.forEach(feedback -> feedback.setStatus(Status.DELETED));
+        feedbackJpaRepository.saveAll(feedbackEntityList);
+    }
+
+    private void deletePredictions(Long userId) {
+        List<PredictionEntity> predictionEntityList = predictionJpaRepository.findByCreatorUserId(userId);
+        predictionEntityList.forEach(prediction -> prediction.setStatus(Status.DELETED));
+        predictionJpaRepository.saveAll(predictionEntityList);
+    }
+
+    private void deleteVotes(Long userId) {
+        List<VoteEntity> voteEntityList = voteJpaRepository.findByVoterUserId(userId);
+        voteEntityList.forEach(vote -> vote.setStatus(Status.DELETED));
+        voteJpaRepository.saveAll(voteEntityList);
     }
 
     private void validateUsername(String username, Long currentUserId) throws AppException {

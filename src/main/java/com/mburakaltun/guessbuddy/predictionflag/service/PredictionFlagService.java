@@ -47,10 +47,17 @@ public class PredictionFlagService {
         predictionFlagEntity.setReporterUser(reporter);
         predictionFlagEntity.setReason(request.getReason());
         predictionFlagEntity.setComment(request.getComment());
-        predictionFlagJpaRepository.save(predictionFlagEntity);
+
+        PredictionFlagEntity savedFlag = predictionFlagJpaRepository.save(predictionFlagEntity);
+
+        long flagCount = predictionFlagJpaRepository.countByPredictionId(prediction.getId());
+        if (flagCount >= 5) {
+            prediction.setStatus(Status.DELETED);
+            predictionJpaRepository.save(prediction);
+        }
 
         return ResponseFlagPrediction.builder()
-                .flagId(predictionFlagEntity.getId())
+                .flagId(savedFlag.getId())
                 .build();
     }
 }

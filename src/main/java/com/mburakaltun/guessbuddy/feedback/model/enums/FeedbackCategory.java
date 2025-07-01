@@ -9,7 +9,7 @@ public enum FeedbackCategory {
     SUGGESTION(1),
     BUG_REPORT(2),
     QUESTION(3),
-    OTHER(4);
+    OTHER(99);
 
     private final int code;
 }

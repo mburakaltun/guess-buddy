@@ -5,11 +5,14 @@ import com.mburakaltun.guessbuddy.common.controller.BaseController;
 import com.mburakaltun.guessbuddy.common.exception.AppException;
 import com.mburakaltun.guessbuddy.common.model.response.ApiResponse;
 import com.mburakaltun.guessbuddy.prediction.model.request.RequestCreatePrediction;
+import com.mburakaltun.guessbuddy.prediction.model.request.RequestFlagPrediction;
 import com.mburakaltun.guessbuddy.prediction.model.request.RequestGetPredictions;
 import com.mburakaltun.guessbuddy.prediction.model.request.RequestGetUserPredictionRates;
 import com.mburakaltun.guessbuddy.prediction.model.response.ResponseCreatePrediction;
+import com.mburakaltun.guessbuddy.prediction.model.response.ResponseFlagPrediction;
 import com.mburakaltun.guessbuddy.prediction.model.response.ResponseGetPredictions;
 import com.mburakaltun.guessbuddy.prediction.model.response.ResponseGetUserPredictionRates;
+import com.mburakaltun.guessbuddy.prediction.service.PredictionFlagService;
 import com.mburakaltun.guessbuddy.prediction.service.PredictionService;
 import com.mburakaltun.guessbuddy.prediction.model.request.RequestGetUserPredictions;
 import com.mburakaltun.guessbuddy.prediction.model.response.ResponseGetUserPredictions;
@@ -31,6 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class PredictionController extends BaseController {
 
     private final PredictionService predictionService;
+    private final PredictionFlagService predictionFlagService;
 
     @PostMapping
     public ResponseEntity<ApiResponse<ResponseCreatePrediction>> createQuote(@RequestHeader(AppHeaders.X_USER_ID) Long userId,
@@ -57,5 +61,12 @@ public class PredictionController extends BaseController {
                                                                                       @ModelAttribute RequestGetUserPredictions requestGetUserPredictions) throws AppException {
         ResponseGetUserPredictions response = predictionService.getUserPredictions(requestGetUserPredictions, userId);
         return ResponseEntity.ok(respond(response));
+    }
+
+    @PostMapping("/flag")
+    public ResponseEntity<ApiResponse<ResponseFlagPrediction>> flagPrediction(@RequestHeader(AppHeaders.X_USER_ID) Long userId,
+                                                                              @RequestBody @Valid RequestFlagPrediction requestFlagPrediction) throws AppException {
+        ResponseFlagPrediction response = predictionFlagService.flagPrediction(requestFlagPrediction, userId);
+        return new ResponseEntity<>(respond(response), HttpStatus.CREATED);
     }
 }

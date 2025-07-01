@@ -81,3 +81,9 @@ management:
     web:
       exposure:
         include: "*"
+
+app:
+  content-filter:
+    objectionable-words: "fuck,shit,damn,hell,ass,bitch,bastard,crap,piss,cock,dick,pussy,whore,slut,fag,nigger,retard,nazi,hitler,kill,die,murder,suicide,rape,sex,porn,xxx,spam,scam,fraud,siktir,amk,aq,amına,göt,yarak,yarrak,orospu,piç,ibne,amcık,çük,sik,pezevenk,gavat,kaltak,salak,gerizekalı,mal,aptal,puşt,kahpe,sikmek,sikeyim,siktirgit,amcığı,amını,sürtük,sürtüğü,fahişe,hayvan,eşek,eşşek,inek,hayvan"
+    case-sensitive: false
+    strict-mode: false

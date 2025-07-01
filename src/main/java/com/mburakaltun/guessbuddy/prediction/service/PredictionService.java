@@ -2,6 +2,7 @@ package com.mburakaltun.guessbuddy.prediction.service;
 
 import com.mburakaltun.guessbuddy.authentication.model.entity.UserEntity;
 import com.mburakaltun.guessbuddy.authentication.model.enums.AuthenticationErrorCode;
+import com.mburakaltun.guessbuddy.common.service.ContentFilterService;
 import com.mburakaltun.guessbuddy.prediction.model.dto.UserPredictionHitRateDto;
 import com.mburakaltun.guessbuddy.prediction.model.request.RequestGetUserPredictionRates;
 import com.mburakaltun.guessbuddy.prediction.model.request.RequestGetUserPredictions;
@@ -40,12 +41,15 @@ public class PredictionService {
     private final PredictionJpaRepository predictionJpaRepository;
     private final VoteJpaRepository voteJpaRepository;
     private final UserJpaRepository userJpaRepository;
+    private final ContentFilterService contentFilterService;
 
     public ResponseCreatePrediction createPrediction(RequestCreatePrediction requestCreatePrediction, Long userId) throws AppException {
         Optional<UserEntity> userEntityOptional = userJpaRepository.findById(userId);
         if (userEntityOptional.isEmpty()) {
             throw new AppException(AuthenticationErrorCode.USER_NOT_FOUND);
         }
+
+        contentFilterService.validateContent(requestCreatePrediction.getTitle(), requestCreatePrediction.getDescription());
 
         PredictionEntity predictionEntity = new PredictionEntity();
         predictionEntity.setTitle(requestCreatePrediction.getTitle());

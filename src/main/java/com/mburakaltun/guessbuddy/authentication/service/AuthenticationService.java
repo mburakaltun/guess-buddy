@@ -18,6 +18,7 @@ import com.mburakaltun.guessbuddy.authentication.model.response.ResponseSignInUs
 import com.mburakaltun.guessbuddy.authentication.model.response.ResponseSignUpUser;
 import com.mburakaltun.guessbuddy.authentication.properties.AuthenticationProperties;
 import com.mburakaltun.guessbuddy.authentication.repository.PasswordResetTokenJpaRepository;
+import com.mburakaltun.guessbuddy.common.service.ContentFilterService;
 import com.mburakaltun.guessbuddy.user.repository.UserJpaRepository;
 import com.mburakaltun.guessbuddy.common.model.enums.AuthorizationRole;
 import com.mburakaltun.guessbuddy.common.exception.AppException;
@@ -53,10 +54,13 @@ public class AuthenticationService {
     private final RefreshTokenService refreshTokenService;
     private final MessageSource messageSource;
     private final AuthenticationProperties authenticationProperties;
+    private final ContentFilterService contentFilterService;
 
     private static final long TOKEN_EXPIRY_MINUTES = 15L;
 
     public ResponseSignUpUser signUpUser(RequestSignUpUser requestSignUpUser) throws AppException {
+        contentFilterService.validateContent(requestSignUpUser.getUsername());
+
         String email = requestSignUpUser.getEmail();
         String password = requestSignUpUser.getPassword();
         String username = requestSignUpUser.getUsername();

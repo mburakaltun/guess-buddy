@@ -4,6 +4,7 @@ import com.mburakaltun.guessbuddy.authentication.model.entity.UserEntity;
 import com.mburakaltun.guessbuddy.authentication.model.enums.AuthenticationErrorCode;
 import com.mburakaltun.guessbuddy.common.exception.AppException;
 import com.mburakaltun.guessbuddy.common.model.enums.Status;
+import com.mburakaltun.guessbuddy.common.service.ContentFilterService;
 import com.mburakaltun.guessbuddy.feedback.model.entity.FeedbackEntity;
 import com.mburakaltun.guessbuddy.feedback.repository.FeedbackJpaRepository;
 import com.mburakaltun.guessbuddy.prediction.model.entity.PredictionEntity;
@@ -39,6 +40,7 @@ public class UserService {
     private final VoteJpaRepository voteJpaRepository;
     private final PredictionJpaRepository predictionJpaRepository;
     private final FeedbackJpaRepository feedbackJpaRepository;
+    private final ContentFilterService contentFilterService;
 
     @Cacheable(cacheNames = UserCacheNames.USER_PROFILE, key = "#userId")
     public ResponseGetUserProfile getUserProfile(RequestGetUserProfile requestGetUserProfile, Long userId) throws AppException {
@@ -54,6 +56,8 @@ public class UserService {
     @Transactional
     @CacheEvict(cacheNames = UserCacheNames.USER_PROFILE, key = "#userId")
     public ResponseChangeUsername changeUsername(RequestChangeUsername request, Long userId) throws AppException {
+        contentFilterService.validateContent(request.getNewUsername());
+
         UserEntity userEntity = userJpaRepository.findById(userId).orElseThrow(() -> new AppException(UserErrorCode.USER_NOT_FOUND));
 
         String newUsername = request.getNewUsername();

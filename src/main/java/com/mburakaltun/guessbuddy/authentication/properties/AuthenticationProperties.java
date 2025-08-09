@@ -12,4 +12,5 @@ import java.util.List;
 public class AuthenticationProperties {
     private List<String> whitelistedEndpoints;
     private String resetPasswordDeepLinkUrl;
+    private int passwordResetTokenExpirationMinutes;
 }

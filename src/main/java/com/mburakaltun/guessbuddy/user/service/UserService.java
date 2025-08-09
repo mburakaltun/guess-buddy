@@ -10,14 +10,22 @@ import com.mburakaltun.guessbuddy.feedback.repository.FeedbackJpaRepository;
 import com.mburakaltun.guessbuddy.prediction.model.entity.PredictionEntity;
 import com.mburakaltun.guessbuddy.prediction.repository.PredictionJpaRepository;
 import com.mburakaltun.guessbuddy.user.constants.UserCacheNames;
+import com.mburakaltun.guessbuddy.user.model.dto.UserDto;
+import com.mburakaltun.guessbuddy.user.model.entity.UserBlockEntity;
 import com.mburakaltun.guessbuddy.user.model.enums.UserErrorCode;
+import com.mburakaltun.guessbuddy.user.model.request.RequestBlockUser;
 import com.mburakaltun.guessbuddy.user.model.request.RequestChangePassword;
 import com.mburakaltun.guessbuddy.user.model.request.RequestChangeUsername;
 import com.mburakaltun.guessbuddy.user.model.request.RequestGetUserProfile;
+import com.mburakaltun.guessbuddy.user.model.request.RequestUnblockUser;
+import com.mburakaltun.guessbuddy.user.model.response.ResponseBlockUser;
 import com.mburakaltun.guessbuddy.user.model.response.ResponseChangePassword;
 import com.mburakaltun.guessbuddy.user.model.response.ResponseChangeUsername;
 import com.mburakaltun.guessbuddy.user.model.response.ResponseDeleteUser;
+import com.mburakaltun.guessbuddy.user.model.response.ResponseGetBlockedUsers;
 import com.mburakaltun.guessbuddy.user.model.response.ResponseGetUserProfile;
+import com.mburakaltun.guessbuddy.user.model.response.ResponseUnblockUser;
+import com.mburakaltun.guessbuddy.user.repository.UserBlockJpaRepository;
 import com.mburakaltun.guessbuddy.user.repository.UserJpaRepository;
 import com.mburakaltun.guessbuddy.vote.model.entity.VoteEntity;
 import com.mburakaltun.guessbuddy.vote.repository.VoteJpaRepository;
@@ -28,6 +36,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
@@ -36,6 +45,7 @@ import java.util.List;
 @Service
 public class UserService {
     private final UserJpaRepository userJpaRepository;
+    private final UserBlockJpaRepository userBlockJpaRepository;
     private final PasswordEncoder passwordEncoder;
     private final VoteJpaRepository voteJpaRepository;
     private final PredictionJpaRepository predictionJpaRepository;
@@ -106,6 +116,69 @@ public class UserService {
 
         return ResponseDeleteUser.builder()
                 .userId(userId)
+                .build();
+    }
+
+    @Transactional
+    public ResponseBlockUser blockUser(RequestBlockUser requestBlockUser, Long userId) throws AppException {
+        Long blockedUserId = requestBlockUser.getBlockedUserId();
+        if (blockedUserId.equals(userId)) {
+            throw new AppException(UserErrorCode.USER_CANNOT_BLOCK_SELF);
+        }
+
+        UserBlockEntity userBlockEntity = new UserBlockEntity();
+        userBlockEntity.setStatus(Status.ACTIVE);
+        userBlockEntity.setBlockerUserId(userId);
+        userBlockEntity.setBlockedUserId(blockedUserId);
+        userBlockJpaRepository.save(userBlockEntity);
+
+        return ResponseBlockUser.builder()
+                .blockedUserId(blockedUserId)
+                .build();
+    }
+
+    @Transactional
+    public ResponseUnblockUser unblockUser(RequestUnblockUser requestUnblockUser, Long userId) throws AppException {
+        Long unblockedUserId = requestUnblockUser.getUnblockedUserId();
+        if (unblockedUserId.equals(userId)) {
+            throw new AppException(UserErrorCode.USER_CANNOT_UNBLOCK_SELF);
+        }
+
+        UserBlockEntity userBlockEntity = userBlockJpaRepository.findByBlockerUserIdAndBlockedUserId(userId, unblockedUserId)
+                .orElseThrow(() -> new AppException(UserErrorCode.USER_BLOCK_NOT_FOUND));
+
+        userBlockEntity.setStatus(Status.DELETED);
+        userBlockJpaRepository.save(userBlockEntity);
+
+        return ResponseUnblockUser.builder()
+                .unblockedUserId(unblockedUserId)
+                .build();
+    }
+
+    @Transactional
+    public ResponseGetBlockedUsers getBlockedUsers(Long userId) {
+        List<UserBlockEntity> userBlockEntities = userBlockJpaRepository.findByBlockerUserId(userId);
+        if (CollectionUtils.isEmpty(userBlockEntities)) {
+            return ResponseGetBlockedUsers.builder()
+                    .blockerUserDtoList(List.of())
+                    .build();
+        }
+
+        List<Long> blockedUserIds = userBlockEntities.stream()
+                .map(UserBlockEntity::getBlockedUserId)
+                .toList();
+
+        List<UserEntity> blockedUsers = userJpaRepository.findAllById(blockedUserIds);
+        List<UserDto> blockerUserDtoList = blockedUsers.stream()
+                .map(user -> UserDto.builder()
+                        .id(user.getId())
+                        .username(user.getUsername())
+                        .email(user.getEmail())
+                        .build())
+                .toList();
+
+        return ResponseGetBlockedUsers.builder()
+                .blockerUserDtoList(blockerUserDtoList)
                 .build();
     }
 

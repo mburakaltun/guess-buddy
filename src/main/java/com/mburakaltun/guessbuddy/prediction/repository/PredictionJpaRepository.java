@@ -3,6 +3,7 @@ package com.mburakaltun.guessbuddy.prediction.repository;
 import com.mburakaltun.guessbuddy.prediction.model.dto.UserPredictionHitRateDto;
 import com.mburakaltun.guessbuddy.prediction.model.entity.PredictionEntity;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -39,4 +40,21 @@ public interface PredictionJpaRepository extends JpaRepository<PredictionEntity,
     );
 
     List<PredictionEntity> findByCreatorUserId(Long userId);
+
+    @Query("""
+        SELECT p
+        FROM PredictionEntity p
+        WHERE p.creatorUser.id NOT IN (
+            SELECT ub.blockedUserId
+            FROM UserBlockEntity ub
+            WHERE ub.blockerUserId = :userId
+        )
+        AND p.creatorUser.id NOT IN (
+            SELECT ub.blockerUserId
+            FROM UserBlockEntity ub
+            WHERE ub.blockedUserId = :userId
+        )
+    """)
+    Page<PredictionEntity> findAllExcludingBlocked(Pageable pageable, @Param("userId") Long userId);
+
 }

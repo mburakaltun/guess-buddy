@@ -35,31 +35,31 @@ public class AuthenticationController extends BaseController {
     private final AuthenticationService authenticationService;
 
     @PostMapping("/sign-up")
-    public ResponseEntity<ApiResponse<ResponseSignUpUser>> signUp(@Valid @RequestBody RequestSignUpUser requestSignUpUser) throws AppException {
+    public ResponseEntity<ApiResponse<ResponseSignUpUser>> signUp(@RequestBody @Valid RequestSignUpUser requestSignUpUser) throws AppException {
         ResponseSignUpUser response = authenticationService.signUpUser(requestSignUpUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(respond(response));
     }
 
     @PostMapping("/sign-in")
-    public ResponseEntity<ApiResponse<ResponseSignInUser>> signIn(@Valid @RequestBody RequestSignInUser requestSignInUser) throws AppException {
+    public ResponseEntity<ApiResponse<ResponseSignInUser>> signIn(@RequestBody @Valid RequestSignInUser requestSignInUser) throws AppException {
         ResponseSignInUser response = authenticationService.signInUser(requestSignInUser);
         return ResponseEntity.ok(respond(response));
     }
 
     @PostMapping("/start-forgot-password")
-    public ResponseEntity<ApiResponse<ResponseStartForgotPassword>> startForgotPassword(@Valid @RequestBody RequestStartForgotPassword requestStartForgotPassword) throws AppException {
+    public ResponseEntity<ApiResponse<ResponseStartForgotPassword>> startForgotPassword(@RequestBody @Valid RequestStartForgotPassword requestStartForgotPassword) throws AppException {
         ResponseStartForgotPassword response = authenticationService.startForgotPassword(requestStartForgotPassword);
         return ResponseEntity.ok(respond(response));
     }
 
     @PostMapping("/complete-forgot-password")
-    public ResponseEntity<ApiResponse<ResponseCompleteForgotPassword>> completeForgotPassword(@Valid @RequestBody RequestCompleteForgotPassword requestCompleteForgotPassword) throws AppException {
+    public ResponseEntity<ApiResponse<ResponseCompleteForgotPassword>> completeForgotPassword(@RequestBody @Valid RequestCompleteForgotPassword requestCompleteForgotPassword) throws AppException {
         ResponseCompleteForgotPassword response = authenticationService.completeForgotPassword(requestCompleteForgotPassword);
         return ResponseEntity.ok(respond(response));
     }
 
     @PostMapping("/refresh-token")
-    public ResponseEntity<ApiResponse<ResponseRefreshToken>> refreshToken(@Valid @RequestBody RequestRefreshToken requestRefreshToken) throws AppException {
+    public ResponseEntity<ApiResponse<ResponseRefreshToken>> refreshToken(@RequestBody @Valid RequestRefreshToken requestRefreshToken) throws AppException {
         ResponseRefreshToken response = authenticationService.refreshToken(requestRefreshToken);
         return ResponseEntity.ok(respond(response));
     }

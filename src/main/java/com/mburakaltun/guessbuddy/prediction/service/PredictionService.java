@@ -67,7 +67,7 @@ public class PredictionService {
         int size = requestGetPredictions.getSize();
 
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
-        Page<PredictionEntity> predictionEntityPage = predictionJpaRepository.findAll(pageRequest);
+        Page<PredictionEntity> predictionEntityPage = predictionJpaRepository.findAllExcludingBlocked(pageRequest, userId);
 
         List<Long> predictionIds = predictionEntityPage.stream()
                 .map(PredictionEntity::getId)

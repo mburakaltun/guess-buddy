@@ -2,6 +2,7 @@ package com.mburakaltun.guessbuddy.feedback.controller;
 
 import com.mburakaltun.guessbuddy.common.constants.AppHeaders;
 import com.mburakaltun.guessbuddy.common.controller.BaseController;
+import com.mburakaltun.guessbuddy.common.exception.AppException;
 import com.mburakaltun.guessbuddy.common.model.response.ApiResponse;
 import com.mburakaltun.guessbuddy.feedback.model.request.RequestSubmitFeedback;
 import com.mburakaltun.guessbuddy.feedback.model.response.ResponseSubmitFeedback;
@@ -22,9 +23,9 @@ public class FeedbackController extends BaseController {
     private final FeedbackService feedbackService;
 
     @PostMapping("/submit")
-    public ResponseEntity<ApiResponse<ResponseSubmitFeedback>> submitFeedback(@RequestHeader(AppHeaders.X_USER_ID) String userId,
-                                                                              @RequestBody RequestSubmitFeedback requestSubmitFeedback) {
-        ResponseSubmitFeedback response = feedbackService.submitFeedback(requestSubmitFeedback, Long.valueOf(userId));
+    public ResponseEntity<ApiResponse<ResponseSubmitFeedback>> submitFeedback(@RequestHeader(AppHeaders.X_USER_ID) Long userId,
+                                                                              @RequestBody RequestSubmitFeedback requestSubmitFeedback) throws AppException {
+        ResponseSubmitFeedback response = feedbackService.submitFeedback(requestSubmitFeedback, userId);
         return ResponseEntity.ok(respond(response));
     }
 }

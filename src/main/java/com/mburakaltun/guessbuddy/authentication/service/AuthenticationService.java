@@ -56,8 +56,6 @@ public class AuthenticationService {
     private final AuthenticationProperties authenticationProperties;
     private final ContentFilterService contentFilterService;
 
-    private static final long TOKEN_EXPIRY_MINUTES = 15L;
-
     public ResponseSignUpUser signUpUser(RequestSignUpUser requestSignUpUser) throws AppException {
         contentFilterService.validateContent(requestSignUpUser.getUsername());
 
@@ -220,7 +218,7 @@ public class AuthenticationService {
         PasswordResetTokenEntity passwordResetTokenEntity = passwordResetTokenEntityOptional.orElseGet(PasswordResetTokenEntity::new);
         passwordResetTokenEntity.setToken(token);
         passwordResetTokenEntity.setUserEntity(userEntity);
-        passwordResetTokenEntity.setExpiryDate(LocalDateTime.now().plusMinutes(TOKEN_EXPIRY_MINUTES));
+        passwordResetTokenEntity.setExpiryDate(LocalDateTime.now().plusMinutes(authenticationProperties.getPasswordResetTokenExpirationMinutes()));
         passwordResetTokenJpaRepository.save(passwordResetTokenEntity);
     }
 

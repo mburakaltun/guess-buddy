@@ -75,6 +75,7 @@ authentication:
     - /authentication/start-forgot-password
     - /authentication/complete-forgot-password
     - /authentication/refresh-token
+  password-reset-token-expiration-minutes: 15
 
 management:
   endpoints:

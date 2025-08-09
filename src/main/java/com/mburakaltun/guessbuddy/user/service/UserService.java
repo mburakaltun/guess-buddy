@@ -160,7 +160,7 @@ public class UserService {
         List<UserBlockEntity> userBlockEntities = userBlockJpaRepository.findByBlockerUserId(userId);
         if (CollectionUtils.isEmpty(userBlockEntities)) {
             return ResponseGetBlockedUsers.builder()
-                    .blockerUserDtoList(List.of())
+                    .blockedUserDtoList(List.of())
                     .build();
         }
 
@@ -178,7 +178,7 @@ public class UserService {
                 .toList();
 
         return ResponseGetBlockedUsers.builder()
-                .blockerUserDtoList(blockerUserDtoList)
+                .blockedUserDtoList(blockerUserDtoList)
                 .build();
     }
 

@@ -13,5 +13,5 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ResponseGetBlockedUsers {
-    private List<UserDto> blockerUserDtoList;
+    private List<UserDto> blockedUserDtoList;
 }

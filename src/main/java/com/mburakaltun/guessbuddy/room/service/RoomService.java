@@ -30,9 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 @Slf4j
@@ -75,10 +73,12 @@ public class RoomService {
         RoomEntity roomEntity = roomJpaRepository.findByPasscode(passcode)
                 .orElseThrow(() -> new AppException(RoomErrorCode.ROOM_NOT_FOUND));
 
+        boolean isHost = roomEntity.getCreatorUserId().equals(userId);
+
         if (roomEntity.getUsers().contains(user)) {
             log.warn("User with ID {} is already in room with ID {}", userId, roomEntity.getId());
             return ResponseJoinRoom.builder()
-                    .isAlreadyInRoom(true)
+                    .isHost(isHost)
                     .roomId(roomEntity.getId())
                     .roomTitle(roomEntity.getTitle())
                     .build();
@@ -88,9 +88,10 @@ public class RoomService {
         roomJpaRepository.save(roomEntity);
 
         return ResponseJoinRoom.builder()
-                .isAlreadyInRoom(false)
+                .isHost(isHost)
                 .roomId(roomEntity.getId())
                 .roomTitle(roomEntity.getTitle())
+                .passcode(roomEntity.getPasscode())
                 .build();
     }
 
@@ -113,6 +114,7 @@ public class RoomService {
             log.warn("User with ID {} is not in room with ID {}", userId, roomId);
             return ResponseLeaveRoom.builder()
                     .isAlreadyLeft(true)
+                    .roomId(roomId)
                     .build();
         }
 
@@ -191,7 +193,7 @@ public class RoomService {
     }
 
     private String generateSixDigitPasscode() {
-        int passcode = 100000 + secureRandom.nextInt(900000);
+        int passcode = 1000 + secureRandom.nextInt(9000);
         return String.valueOf(passcode);
     }
 }

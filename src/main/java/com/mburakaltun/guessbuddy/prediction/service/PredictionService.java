@@ -119,7 +119,7 @@ public class PredictionService {
         int size = requestGetUserPredictions.getSize();
 
         Pageable pageable = PageRequest.of(page, size);
-        Page<PredictionEntity> predictionEntityPage = predictionJpaRepository.findByCreatorUserIdOrderByAverageScore(userId, roomId, pageable);
+        Page<PredictionEntity> predictionEntityPage = predictionJpaRepository.findByCreatorUserIdAndRoomIdOrderByAverageScore(userId, roomId, pageable);
 
         List<PredictionDto> predictionDtoList = predictionEntityPage.stream()
                 .map(PredictionMapper::toDto)

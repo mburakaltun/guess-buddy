@@ -6,7 +6,8 @@ import lombok.Data;
 @Data
 @Builder
 public class ResponseJoinRoom {
-    private Boolean isAlreadyInRoom;
+    private Boolean isHost;
     private Long roomId;
     private String roomTitle;
+    private String passcode;
 }

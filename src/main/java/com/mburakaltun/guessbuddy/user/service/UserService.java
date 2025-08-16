@@ -8,6 +8,8 @@ import com.mburakaltun.guessbuddy.feedback.model.entity.FeedbackEntity;
 import com.mburakaltun.guessbuddy.feedback.repository.FeedbackJpaRepository;
 import com.mburakaltun.guessbuddy.prediction.model.entity.PredictionEntity;
 import com.mburakaltun.guessbuddy.prediction.repository.PredictionJpaRepository;
+import com.mburakaltun.guessbuddy.room.model.entity.RoomEntity;
+import com.mburakaltun.guessbuddy.room.repository.RoomJpaRepository;
 import com.mburakaltun.guessbuddy.user.constants.UserCacheNames;
 import com.mburakaltun.guessbuddy.user.model.dto.UserDto;
 import com.mburakaltun.guessbuddy.user.model.entity.UserBlockEntity;
@@ -48,6 +50,7 @@ public class UserService {
     private final VoteJpaRepository voteJpaRepository;
     private final PredictionJpaRepository predictionJpaRepository;
     private final FeedbackJpaRepository feedbackJpaRepository;
+    private final RoomJpaRepository roomJpaRepository;
 
     @Cacheable(cacheNames = UserCacheNames.USER_PROFILE, key = "#userId")
     public ResponseGetUserProfile getUserProfile(RequestGetUserProfile requestGetUserProfile, Long userId) throws AppException {
@@ -106,6 +109,7 @@ public class UserService {
         deleteVotes(userId);
         deletePredictions(userId);
         deleteFeedbacks(userId);
+        deleteRooms(userId);
 
         userEntity.setStatus(Status.DELETED);
         userJpaRepository.save(userEntity);
@@ -176,6 +180,16 @@ public class UserService {
         List<VoteEntity> voteEntityList = voteJpaRepository.findByVoterUserId(userId);
         voteEntityList.forEach(vote -> vote.setStatus(Status.DELETED));
         voteJpaRepository.saveAll(voteEntityList);
+    }
+
+    private void deleteRooms(Long userId) {
+        List<RoomEntity> roomEntityList = roomJpaRepository.findByCreatorUserId(userId);
+        roomEntityList.forEach(room -> {
+            room.setStatus(Status.DELETED);
+            room.getUsers().clear();
+        });
+
+        roomJpaRepository.saveAll(roomEntityList);
     }
 
     private void validateUsername(String username, Long currentUserId) throws AppException {

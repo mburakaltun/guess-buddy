@@ -81,6 +81,7 @@ public class RoomService {
                     .isHost(isHost)
                     .roomId(roomEntity.getId())
                     .roomTitle(roomEntity.getTitle())
+                    .passcode(passcode)
                     .build();
         }
 

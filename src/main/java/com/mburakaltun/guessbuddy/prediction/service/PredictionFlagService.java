@@ -1,9 +1,6 @@
 package com.mburakaltun.guessbuddy.prediction.service;
 
 import com.mburakaltun.guessbuddy.common.exception.AppException;
-import com.mburakaltun.guessbuddy.common.service.ContentFilterService;
-import com.mburakaltun.guessbuddy.common.util.StringUtility;
-import com.mburakaltun.guessbuddy.feedback.model.enums.FeedbackCategory;
 import com.mburakaltun.guessbuddy.prediction.model.entity.PredictionEntity;
 import com.mburakaltun.guessbuddy.prediction.model.entity.PredictionFlagEntity;
 import com.mburakaltun.guessbuddy.prediction.model.enums.PredictionErrorCode;
@@ -16,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -26,7 +22,6 @@ public class PredictionFlagService {
 
     private final PredictionFlagJpaRepository predictionFlagJpaRepository;
     private final PredictionJpaRepository predictionJpaRepository;
-    private final ContentFilterService contentFilterService;
 
     @Transactional
     public ResponseFlagPrediction flagPrediction(RequestFlagPrediction request, Long reporterUserId) throws AppException {
@@ -40,8 +35,6 @@ public class PredictionFlagService {
         if (existingFlag.isPresent()) {
             throw new AppException(PredictionErrorCode.PREDICTION_ALREADY_FLAGGED);
         }
-
-        contentFilterService.validateContent(request.getReason());
 
         PredictionFlagEntity flagEntity = new PredictionFlagEntity();
         flagEntity.setPredictionId(request.getPredictionId());

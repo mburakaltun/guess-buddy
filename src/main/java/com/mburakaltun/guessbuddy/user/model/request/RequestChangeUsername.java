@@ -1,5 +1,6 @@
 package com.mburakaltun.guessbuddy.user.model.request;
 
+import com.mburakaltun.guessbuddy.common.annotation.CleanContent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -15,5 +16,6 @@ public class RequestChangeUsername {
 
     @NotBlank(message = "{validation.username.notBlank}")
     @Size(min = 3, max = 31, message = "{validation.username.size}")
+    @CleanContent(message = "{validation.username.filtered}")
     private String newUsername;
 }

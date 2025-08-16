@@ -2,15 +2,12 @@ package com.mburakaltun.guessbuddy.room.model.entity;
 
 import com.mburakaltun.guessbuddy.authentication.model.entity.UserEntity;
 import com.mburakaltun.guessbuddy.common.model.entity.BaseStatusEntity;
-import com.mburakaltun.guessbuddy.prediction.model.entity.PredictionEntity;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -33,9 +30,6 @@ public class RoomEntity extends BaseStatusEntity {
 
     @Column(nullable = false, unique = true)
     private String passcode;
-
-    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<PredictionEntity> predictions = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(

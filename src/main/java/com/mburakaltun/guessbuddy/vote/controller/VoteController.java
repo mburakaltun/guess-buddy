@@ -25,9 +25,10 @@ public class VoteController extends BaseController {
     private final VoteService voteService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<ResponseVotePrediction>> createVote(@RequestHeader(AppHeaders.X_USER_ID) String userId,
-                                                                              @RequestBody @Valid RequestVotePrediction requestVotePrediction) throws AppException {
-        ResponseVotePrediction response = voteService.createVote(requestVotePrediction, userId);
+    public ResponseEntity<ApiResponse<ResponseVotePrediction>> createVote(@RequestHeader(AppHeaders.X_USER_ID) Long userId,
+                                                                          @RequestHeader(AppHeaders.X_ROOM_ID) Long roomId,
+                                                                          @RequestBody @Valid RequestVotePrediction requestVotePrediction) throws AppException {
+        ResponseVotePrediction response = voteService.createVote(requestVotePrediction, userId, roomId);
         return new ResponseEntity<>(respond(response), HttpStatus.CREATED);
     }
 }

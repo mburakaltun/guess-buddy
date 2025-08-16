@@ -37,29 +37,33 @@ public class PredictionController extends BaseController {
     private final PredictionFlagService predictionFlagService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<ResponseCreatePrediction>> createQuote(@RequestHeader(AppHeaders.X_USER_ID) Long userId,
-                                                                             @RequestBody @Valid RequestCreatePrediction requestCreatePrediction) throws AppException {
-        ResponseCreatePrediction response = predictionService.createPrediction(requestCreatePrediction, userId);
+    public ResponseEntity<ApiResponse<ResponseCreatePrediction>> createPrediction(@RequestHeader(AppHeaders.X_USER_ID) Long userId,
+                                                                                  @RequestHeader(AppHeaders.X_ROOM_ID) Long roomId,
+                                                                                  @RequestBody @Valid RequestCreatePrediction requestCreatePrediction) throws AppException {
+        ResponseCreatePrediction response = predictionService.createPrediction(requestCreatePrediction, userId, roomId);
         return new ResponseEntity<>(respond(response), HttpStatus.CREATED);
     }
 
     @GetMapping
     public ResponseEntity<ApiResponse<ResponseGetPredictions>> getPredictions(@RequestHeader(value = AppHeaders.X_USER_ID) Long userId,
+                                                                              @RequestHeader(AppHeaders.X_ROOM_ID) Long roomId,
                                                                               @ModelAttribute @Valid RequestGetPredictions requestGetPredictions) {
-        ResponseGetPredictions response = predictionService.getPredictions(requestGetPredictions, userId);
+        ResponseGetPredictions response = predictionService.getPredictions(requestGetPredictions, userId, roomId);
         return new ResponseEntity<>(respond(response), HttpStatus.OK);
     }
 
     @GetMapping("/user-hit-rates")
-    public ResponseEntity<ApiResponse<ResponseGetUserPredictionRates>> getUserPredictionRates(@ModelAttribute @Valid RequestGetUserPredictionRates requestGetUserPredictionRates) {
-        ResponseGetUserPredictionRates response = predictionService.getUserPredictionRates(requestGetUserPredictionRates);
+    public ResponseEntity<ApiResponse<ResponseGetUserPredictionRates>> getUserPredictionRates(@RequestHeader(AppHeaders.X_ROOM_ID) Long roomId,
+                                                                                              @ModelAttribute @Valid RequestGetUserPredictionRates requestGetUserPredictionRates) {
+        ResponseGetUserPredictionRates response = predictionService.getUserPredictionRates(requestGetUserPredictionRates, roomId);
         return new ResponseEntity<>(respond(response), HttpStatus.OK);
     }
 
     @GetMapping("/my-predictions")
     public ResponseEntity<ApiResponse<ResponseGetUserPredictions>> getUserPredictions(@RequestHeader(AppHeaders.X_USER_ID) Long userId,
-                                                                                      @ModelAttribute RequestGetUserPredictions requestGetUserPredictions) throws AppException {
-        ResponseGetUserPredictions response = predictionService.getUserPredictions(requestGetUserPredictions, userId);
+                                                                                      @RequestHeader(AppHeaders.X_ROOM_ID) Long roomId,
+                                                                                      @ModelAttribute @Valid RequestGetUserPredictions requestGetUserPredictions) throws AppException {
+        ResponseGetUserPredictions response = predictionService.getUserPredictions(requestGetUserPredictions, userId, roomId);
         return ResponseEntity.ok(respond(response));
     }
 

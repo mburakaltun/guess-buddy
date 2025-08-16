@@ -2,12 +2,14 @@ package com.mburakaltun.guessbuddy.prediction.service;
 
 import com.mburakaltun.guessbuddy.authentication.model.entity.UserEntity;
 import com.mburakaltun.guessbuddy.authentication.model.enums.AuthenticationErrorCode;
-import com.mburakaltun.guessbuddy.common.service.ContentFilterService;
 import com.mburakaltun.guessbuddy.prediction.model.dto.UserPredictionHitRateDto;
 import com.mburakaltun.guessbuddy.prediction.model.request.RequestGetUserPredictionRates;
 import com.mburakaltun.guessbuddy.prediction.model.request.RequestGetUserPredictions;
 import com.mburakaltun.guessbuddy.prediction.model.response.ResponseGetUserPredictionRates;
 import com.mburakaltun.guessbuddy.prediction.model.response.ResponseGetUserPredictions;
+import com.mburakaltun.guessbuddy.room.model.entity.RoomEntity;
+import com.mburakaltun.guessbuddy.room.model.enums.RoomErrorCode;
+import com.mburakaltun.guessbuddy.room.repository.RoomJpaRepository;
 import com.mburakaltun.guessbuddy.user.repository.UserJpaRepository;
 import com.mburakaltun.guessbuddy.common.exception.AppException;
 import com.mburakaltun.guessbuddy.prediction.model.dto.PredictionDto;
@@ -31,7 +33,6 @@ import org.springframework.util.CollectionUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -41,20 +42,20 @@ public class PredictionService {
     private final PredictionJpaRepository predictionJpaRepository;
     private final VoteJpaRepository voteJpaRepository;
     private final UserJpaRepository userJpaRepository;
-    private final ContentFilterService contentFilterService;
+    private final RoomJpaRepository roomJpaRepository;
 
-    public ResponseCreatePrediction createPrediction(RequestCreatePrediction requestCreatePrediction, Long userId) throws AppException {
-        Optional<UserEntity> userEntityOptional = userJpaRepository.findById(userId);
-        if (userEntityOptional.isEmpty()) {
-            throw new AppException(AuthenticationErrorCode.USER_NOT_FOUND);
-        }
+    public ResponseCreatePrediction createPrediction(RequestCreatePrediction requestCreatePrediction, Long userId, Long roomId) throws AppException {
+        UserEntity userEntity = userJpaRepository.findById(userId)
+                .orElseThrow(() -> new AppException(AuthenticationErrorCode.USER_NOT_FOUND));
 
-        contentFilterService.validateContent(requestCreatePrediction.getTitle(), requestCreatePrediction.getDescription());
+        RoomEntity roomEntity = roomJpaRepository.findById(roomId)
+                .orElseThrow(() -> new AppException(RoomErrorCode.ROOM_NOT_FOUND));
 
         PredictionEntity predictionEntity = new PredictionEntity();
         predictionEntity.setTitle(requestCreatePrediction.getTitle());
         predictionEntity.setDescription(requestCreatePrediction.getDescription());
-        predictionEntity.setCreatorUser(userEntityOptional.get());
+        predictionEntity.setCreatorUser(userEntity);
+        predictionEntity.setRoomId(roomId);
         PredictionEntity savedEntity = predictionJpaRepository.save(predictionEntity);
 
         return ResponseCreatePrediction.builder()
@@ -62,12 +63,12 @@ public class PredictionService {
                 .build();
     }
 
-    public ResponseGetPredictions getPredictions(RequestGetPredictions requestGetPredictions, Long userId) {
+    public ResponseGetPredictions getPredictions(RequestGetPredictions requestGetPredictions, Long userId, Long roomId) {
         int page = requestGetPredictions.getPage();
         int size = requestGetPredictions.getSize();
 
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
-        Page<PredictionEntity> predictionEntityPage = predictionJpaRepository.findAllExcludingBlocked(pageRequest, userId);
+        Page<PredictionEntity> predictionEntityPage = predictionJpaRepository.findAllExcludingBlocked(pageRequest, userId, roomId);
 
         List<Long> predictionIds = predictionEntityPage.stream()
                 .map(PredictionEntity::getId)
@@ -97,12 +98,12 @@ public class PredictionService {
         return userVotesMap;
     }
 
-    public ResponseGetUserPredictionRates getUserPredictionRates(RequestGetUserPredictionRates requestGetUserPredictionRates) {
+    public ResponseGetUserPredictionRates getUserPredictionRates(RequestGetUserPredictionRates requestGetUserPredictionRates, Long roomId) {
         int page = requestGetUserPredictionRates.getPage();
         int size = requestGetUserPredictionRates.getSize();
 
         Pageable pageable = PageRequest.of(page, size);
-        Page<UserPredictionHitRateDto> userPredictionHitRateDtoPage = predictionJpaRepository.findAllUsersByPredictionHitRate(pageable);
+        Page<UserPredictionHitRateDto> userPredictionHitRateDtoPage = predictionJpaRepository.findAllUsersByPredictionHitRate(pageable, roomId);
 
         return ResponseGetUserPredictionRates.builder()
                 .userPredictionHitRateDtoList(userPredictionHitRateDtoPage.getContent())
@@ -113,12 +114,12 @@ public class PredictionService {
                 .build();
     }
 
-    public ResponseGetUserPredictions getUserPredictions(RequestGetUserPredictions requestGetUserPredictions, Long userId) {
+    public ResponseGetUserPredictions getUserPredictions(RequestGetUserPredictions requestGetUserPredictions, Long userId, Long roomId) {
         int page = requestGetUserPredictions.getPage();
         int size = requestGetUserPredictions.getSize();
 
         Pageable pageable = PageRequest.of(page, size);
-        Page<PredictionEntity> predictionEntityPage = predictionJpaRepository.findByCreatorUserIdOrderByAverageScore(userId, pageable);
+        Page<PredictionEntity> predictionEntityPage = predictionJpaRepository.findByCreatorUserIdOrderByAverageScore(userId, roomId, pageable);
 
         List<PredictionDto> predictionDtoList = predictionEntityPage.stream()
                 .map(PredictionMapper::toDto)

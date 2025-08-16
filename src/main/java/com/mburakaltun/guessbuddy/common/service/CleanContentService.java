@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 
 @Slf4j
 @Service
-public class ContentFilterService {
+public class CleanContentService {
 
     @Value("${app.content-filter.objectionable-words}")
     private String objectionableWordsConfig;

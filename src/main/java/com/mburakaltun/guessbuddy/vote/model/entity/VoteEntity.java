@@ -15,5 +15,6 @@ import org.hibernate.annotations.SQLRestriction;
 public class VoteEntity extends BaseStatusEntity {
     private long predictionId;
     private long voterUserId;
+    private long roomId;
     private int score;
 }

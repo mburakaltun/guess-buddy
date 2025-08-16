@@ -6,5 +6,7 @@ import lombok.Data;
 @Data
 @Builder
 public class ResponseCreateRoom {
-    private String roomPasscode;
+    private Long roomId;
+    private String roomTitle;
+    private String passcode;
 }

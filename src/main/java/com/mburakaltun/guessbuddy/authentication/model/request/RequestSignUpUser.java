@@ -1,5 +1,6 @@
 package com.mburakaltun.guessbuddy.authentication.model.request;
 
+import com.mburakaltun.guessbuddy.common.annotation.CleanContent;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -16,10 +17,12 @@ public class RequestSignUpUser {
 
     @NotBlank(message = "{validation.email.notBlank}")
     @Email(message = "{validation.email.invalid}")
+    @CleanContent(message = "{validation.email.filtered}")
     private String email;
 
     @NotBlank(message = "{validation.username.notBlank}")
     @Size(min = 3, max = 31, message = "{validation.username.size}")
+    @CleanContent(message = "{validation.username.filtered}")
     private String username;
 
     @NotBlank(message = "{validation.password.notBlank}")

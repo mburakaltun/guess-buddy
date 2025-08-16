@@ -15,4 +15,8 @@ public interface VoteJpaRepository extends JpaRepository<VoteEntity, Long> {
     List<VoteEntity> findByPredictionIdInAndVoterUserId(List<Long> predictionIds, Long userIdLong);
 
     List<VoteEntity> findByVoterUserId(Long userId);
+
+    List<VoteEntity> findByPredictionIdIn(List<Long> predictionIds);
+
+    List<VoteEntity> findByVoterUserIdAndRoomId(Long userId, Long roomId);
 }

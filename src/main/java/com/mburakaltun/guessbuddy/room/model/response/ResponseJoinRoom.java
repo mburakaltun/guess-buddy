@@ -8,4 +8,5 @@ import lombok.Data;
 public class ResponseJoinRoom {
     private Boolean isAlreadyInRoom;
     private Long roomId;
+    private String roomTitle;
 }

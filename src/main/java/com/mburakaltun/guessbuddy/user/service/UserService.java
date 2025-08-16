@@ -4,7 +4,6 @@ import com.mburakaltun.guessbuddy.authentication.model.entity.UserEntity;
 import com.mburakaltun.guessbuddy.authentication.model.enums.AuthenticationErrorCode;
 import com.mburakaltun.guessbuddy.common.exception.AppException;
 import com.mburakaltun.guessbuddy.common.model.enums.Status;
-import com.mburakaltun.guessbuddy.common.service.ContentFilterService;
 import com.mburakaltun.guessbuddy.feedback.model.entity.FeedbackEntity;
 import com.mburakaltun.guessbuddy.feedback.repository.FeedbackJpaRepository;
 import com.mburakaltun.guessbuddy.prediction.model.entity.PredictionEntity;
@@ -36,7 +35,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
@@ -50,7 +48,6 @@ public class UserService {
     private final VoteJpaRepository voteJpaRepository;
     private final PredictionJpaRepository predictionJpaRepository;
     private final FeedbackJpaRepository feedbackJpaRepository;
-    private final ContentFilterService contentFilterService;
 
     @Cacheable(cacheNames = UserCacheNames.USER_PROFILE, key = "#userId")
     public ResponseGetUserProfile getUserProfile(RequestGetUserProfile requestGetUserProfile, Long userId) throws AppException {
@@ -66,8 +63,6 @@ public class UserService {
     @Transactional
     @CacheEvict(cacheNames = UserCacheNames.USER_PROFILE, key = "#userId")
     public ResponseChangeUsername changeUsername(RequestChangeUsername request, Long userId) throws AppException {
-        contentFilterService.validateContent(request.getNewUsername());
-
         UserEntity userEntity = userJpaRepository.findById(userId).orElseThrow(() -> new AppException(UserErrorCode.USER_NOT_FOUND));
 
         String newUsername = request.getNewUsername();
@@ -82,6 +77,7 @@ public class UserService {
                 .build();
     }
 
+    @Transactional
     public ResponseChangePassword changePassword(RequestChangePassword requestChangePassword, Long userId) throws AppException {
         if (!requestChangePassword.getNewPassword().equals(requestChangePassword.getConfirmNewPassword())) {
             throw new AppException(UserErrorCode.PASSWORD_MISMATCH);
@@ -157,25 +153,7 @@ public class UserService {
 
     @Transactional
     public ResponseGetBlockedUsers getBlockedUsers(Long userId) {
-        List<UserBlockEntity> userBlockEntities = userBlockJpaRepository.findByBlockerUserId(userId);
-        if (CollectionUtils.isEmpty(userBlockEntities)) {
-            return ResponseGetBlockedUsers.builder()
-                    .blockedUserDtoList(List.of())
-                    .build();
-        }
-
-        List<Long> blockedUserIds = userBlockEntities.stream()
-                .map(UserBlockEntity::getBlockedUserId)
-                .toList();
-
-        List<UserEntity> blockedUsers = userJpaRepository.findAllById(blockedUserIds);
-        List<UserDto> blockerUserDtoList = blockedUsers.stream()
-                .map(user -> UserDto.builder()
-                        .id(user.getId())
-                        .username(user.getUsername())
-                        .email(user.getEmail())
-                        .build())
-                .toList();
+        List<UserDto> blockerUserDtoList = userJpaRepository.findBlockedUsersByBlockerId(userId);
 
         return ResponseGetBlockedUsers.builder()
                 .blockedUserDtoList(blockerUserDtoList)

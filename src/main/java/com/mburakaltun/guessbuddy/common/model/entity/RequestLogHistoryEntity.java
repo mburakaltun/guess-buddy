@@ -9,10 +9,6 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-/**
- * Entity for storing historical request logs.
- * This table is used to archive request logs from the main request_log table.
- */
 @Getter
 @Setter
 @Entity

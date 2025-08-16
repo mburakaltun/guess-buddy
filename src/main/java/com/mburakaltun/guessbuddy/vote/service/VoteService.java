@@ -10,7 +10,6 @@ import com.mburakaltun.guessbuddy.vote.model.request.RequestVotePrediction;
 import com.mburakaltun.guessbuddy.vote.repository.VoteJpaRepository;
 import com.mburakaltun.guessbuddy.vote.response.ResponseVotePrediction;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
@@ -26,11 +25,11 @@ public class VoteService {
 
     @Transactional
     @CacheEvict(cacheNames = {PredictionCacheNames.PREDICTIONS, PredictionCacheNames.USER_PREDICTIONS, PredictionCacheNames.PREDICTION_RATES}, allEntries = true)
-    public ResponseVotePrediction createVote(@Valid RequestVotePrediction requestVotePrediction, String userId) throws AppException {
+    public ResponseVotePrediction createVote(RequestVotePrediction requestVotePrediction, Long userId, Long roomId) throws AppException {
         PredictionEntity predictionEntity = predictionJpaRepository.findById(requestVotePrediction.getPredictionId())
                 .orElseThrow(() -> new AppException(PredictionErrorCode.PREDICTION_NOT_FOUND));
 
-        Optional<VoteEntity> existingVoteOptional = voteJpaRepository.findByPredictionIdAndVoterUserId(requestVotePrediction.getPredictionId(), Long.parseLong(userId));
+        Optional<VoteEntity> existingVoteOptional = voteJpaRepository.findByPredictionIdAndVoterUserId(requestVotePrediction.getPredictionId(), userId);
         if (existingVoteOptional.isPresent()) {
             VoteEntity existingVoteEntity = existingVoteOptional.get();
             int oldScore = existingVoteEntity.getScore();
@@ -41,7 +40,8 @@ public class VoteService {
         } else {
             VoteEntity voteEntity = new VoteEntity();
             voteEntity.setPredictionId(requestVotePrediction.getPredictionId());
-            voteEntity.setVoterUserId(Long.parseLong(userId));
+            voteEntity.setVoterUserId(userId);
+            voteEntity.setRoomId(roomId);
             voteEntity.setScore(requestVotePrediction.getScore());
             voteJpaRepository.save(voteEntity);
 

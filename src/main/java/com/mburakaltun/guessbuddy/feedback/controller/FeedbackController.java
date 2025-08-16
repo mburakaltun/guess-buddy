@@ -7,6 +7,7 @@ import com.mburakaltun.guessbuddy.common.model.response.ApiResponse;
 import com.mburakaltun.guessbuddy.feedback.model.request.RequestSubmitFeedback;
 import com.mburakaltun.guessbuddy.feedback.model.response.ResponseSubmitFeedback;
 import com.mburakaltun.guessbuddy.feedback.service.FeedbackService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,7 +25,7 @@ public class FeedbackController extends BaseController {
 
     @PostMapping("/submit")
     public ResponseEntity<ApiResponse<ResponseSubmitFeedback>> submitFeedback(@RequestHeader(AppHeaders.X_USER_ID) Long userId,
-                                                                              @RequestBody RequestSubmitFeedback requestSubmitFeedback) throws AppException {
+                                                                              @RequestBody @Valid RequestSubmitFeedback requestSubmitFeedback) {
         ResponseSubmitFeedback response = feedbackService.submitFeedback(requestSubmitFeedback, userId);
         return ResponseEntity.ok(respond(response));
     }

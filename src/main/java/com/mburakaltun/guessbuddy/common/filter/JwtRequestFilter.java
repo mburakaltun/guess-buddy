@@ -1,10 +1,12 @@
 package com.mburakaltun.guessbuddy.common.filter;
 
-import com.mburakaltun.guessbuddy.common.util.JwtUtility;
+import com.mburakaltun.guessbuddy.common.exception.FilterExceptionHandler;
+import com.mburakaltun.guessbuddy.common.service.JwtService;
 import com.mburakaltun.guessbuddy.authentication.properties.AuthenticationProperties;
 import com.mburakaltun.guessbuddy.common.model.request.CreateRequestLogRequest;
 import com.mburakaltun.guessbuddy.common.service.RequestLogService;
 import com.mburakaltun.guessbuddy.common.util.StringUtility;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,6 +27,7 @@ import org.springframework.web.util.ContentCachingResponseWrapper;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 
 @Order(2)
 @Slf4j
@@ -35,6 +38,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
     private final AuthenticationProperties authenticationProperties;
     private final RequestLogService requestLogService;
+    private final JwtService jwtService;
+    private final FilterExceptionHandler filterExceptionHandler;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -43,6 +48,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         long startTime = System.currentTimeMillis();
         boolean unauthorized = false;
+        Locale locale = request.getLocale();
 
         try {
             String token = getTokenFromRequest(wrappedRequest);
@@ -50,13 +56,22 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 log.warn("No JWT token found in request headers");
                 unauthorized = true;
             } else {
-                String username = JwtUtility.extractUsername(token);
+                String username = jwtService.extractUsername(token);
                 if (username == null || !handleAuthentication(wrappedRequest, token, username)) {
                     log.warn("Invalid JWT token or missing username");
                     unauthorized = true;
                 }
             }
-        } catch (Exception e) {
+        } catch (ExpiredJwtException e) {
+            log.warn("JWT token has expired: {}", e.getMessage());
+            filterExceptionHandler.handleExpiredJwtException(wrappedResponse, e, locale);
+
+            long duration = System.currentTimeMillis() - startTime;
+            createRequestLog(wrappedRequest, wrappedResponse, HttpServletResponse.SC_UNAUTHORIZED, duration);
+            wrappedResponse.copyBodyToResponse();
+            return;
+        }
+        catch (Exception e) {
             log.error("Error during JWT processing", e);
             unauthorized = true;
         }
@@ -109,7 +124,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     private boolean handleAuthentication(HttpServletRequest request, String token, String username) {
         if (SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-            if (JwtUtility.validateToken(token, userDetails.getUsername())) {
+            if (jwtService.validateToken(token, userDetails.getUsername())) {
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

@@ -21,7 +21,7 @@ import com.mburakaltun.guessbuddy.authentication.repository.PasswordResetTokenJp
 import com.mburakaltun.guessbuddy.user.repository.UserJpaRepository;
 import com.mburakaltun.guessbuddy.common.model.enums.AuthorizationRole;
 import com.mburakaltun.guessbuddy.common.exception.AppException;
-import com.mburakaltun.guessbuddy.common.util.JwtUtility;
+import com.mburakaltun.guessbuddy.common.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
@@ -53,6 +53,7 @@ public class AuthenticationService {
     private final RefreshTokenService refreshTokenService;
     private final MessageSource messageSource;
     private final AuthenticationProperties authenticationProperties;
+    private final JwtService jwtService;
 
     public ResponseSignUpUser signUpUser(RequestSignUpUser requestSignUpUser) throws AppException {
         String email = requestSignUpUser.getEmail();
@@ -86,7 +87,7 @@ public class AuthenticationService {
         Authentication authentication = authenticateUser(email, password);
 
         AuthorizationRole role = generateRole(authentication);
-        String authenticationToken = JwtUtility.generateToken(email, role);
+        String authenticationToken = jwtService.generateToken(email, role);
 
         RefreshTokenEntity refreshTokenEntity = refreshTokenService.createRefreshToken(userEntity.getId());
 
@@ -104,7 +105,7 @@ public class AuthenticationService {
         RefreshTokenEntity refreshTokenEntity = refreshTokenService.validateRefreshToken(refreshToken);
         UserEntity userEntity = refreshTokenEntity.getUser();
 
-        String accessToken = JwtUtility.generateAccessTokenFromRefreshToken(userEntity.getEmail(), userEntity.getRole());
+        String accessToken = jwtService.generateAccessTokenFromRefreshToken(userEntity.getEmail(), userEntity.getRole());
 
         refreshTokenService.deleteRefreshToken(refreshToken);
         RefreshTokenEntity newRefreshTokenEntity = refreshTokenService.createRefreshToken(userEntity.getId());

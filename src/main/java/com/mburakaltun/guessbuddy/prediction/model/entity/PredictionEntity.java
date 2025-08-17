@@ -25,8 +25,9 @@ public class PredictionEntity extends BaseStatusEntity {
     @Column(nullable = false)
     private Long roomId;
 
+    @Column(nullable = false)
     private String title;
+
+    @Column(nullable = false)
     private String description;
-    private long voteCount;
-    private long totalScore;
 }

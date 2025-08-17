@@ -2,6 +2,7 @@ package com.mburakaltun.guessbuddy.common.exception;
 
 import com.mburakaltun.guessbuddy.common.model.response.ApiExceptionResponse;
 import com.mburakaltun.guessbuddy.common.util.ResponseUtility;
+import io.jsonwebtoken.ExpiredJwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
@@ -77,6 +78,16 @@ public class GlobalExceptionHandler {
         log.error(exception.getMessage(), exception);
         ApiExceptionResponse response = ResponseUtility.error(exception.getMessage());
         return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ResponseEntity<ApiExceptionResponse> handleExpiredJwtException(ExpiredJwtException exception, Locale locale) {
+        String errorCode = "AUTH_0001";
+        String errorMessage = getLocalizedMessage(errorCode, locale);
+
+        log.error(exception.getMessage(), exception);
+        ApiExceptionResponse response = ResponseUtility.error(errorMessage, errorCode);
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
     }
 
     public String getLocalizedMessage(String messageKey, Locale locale) {

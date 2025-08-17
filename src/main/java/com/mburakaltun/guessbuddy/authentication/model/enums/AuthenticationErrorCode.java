@@ -18,6 +18,7 @@ public enum AuthenticationErrorCode implements ErrorCode {
     TOKEN_EXPIRED("AUTH_0008"),
     INVALID_REFRESH_TOKEN("AUTH_0009"),
     EXPIRED_REFRESH_TOKEN("AUTH_0010"),
+    EXPIRED_ACCESS_TOKEN("AUTH_0011")
     ;
 
     private final String code;

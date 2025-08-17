@@ -2,6 +2,7 @@ package com.mburakaltun.guessbuddy.prediction.service;
 
 import com.mburakaltun.guessbuddy.authentication.model.entity.UserEntity;
 import com.mburakaltun.guessbuddy.authentication.model.enums.AuthenticationErrorCode;
+import com.mburakaltun.guessbuddy.prediction.model.dto.PredictionScoreCountDto;
 import com.mburakaltun.guessbuddy.prediction.model.dto.UserPredictionHitRateDto;
 import com.mburakaltun.guessbuddy.prediction.model.request.RequestGetUserPredictionRates;
 import com.mburakaltun.guessbuddy.prediction.model.request.RequestGetUserPredictions;
@@ -76,8 +77,12 @@ public class PredictionService {
 
         Map<Long, Integer> userVotesMap = getUserVotesMap(predictionIds, userId);
 
+        List<PredictionScoreCountDto> predictionScoreCountDtoList = voteJpaRepository.findScoreCountsByPredictionIds(predictionIds);
+        Map<Long, PredictionScoreCountDto> predictionScoreCountMap = predictionScoreCountDtoList.stream()
+                .collect(Collectors.toMap(PredictionScoreCountDto::getPredictionId, dto -> dto));
+
         List<PredictionDto> predictionDtoList = predictionEntityPage.stream()
-                .map(entity -> PredictionMapper.toDto(entity, userVotesMap))
+                .map(entity -> PredictionMapper.toDto(entity, userVotesMap, predictionScoreCountMap))
                 .toList();
 
         return ResponseGetPredictions.builder()
@@ -121,8 +126,16 @@ public class PredictionService {
         Pageable pageable = PageRequest.of(page, size);
         Page<PredictionEntity> predictionEntityPage = predictionJpaRepository.findByCreatorUserIdAndRoomIdOrderByAverageScore(userId, roomId, pageable);
 
+        List<Long> predictionIds = predictionEntityPage.stream()
+                .map(PredictionEntity::getId)
+                .toList();
+
+        List<PredictionScoreCountDto> predictionScoreCountDtoList = voteJpaRepository.findScoreCountsByPredictionIds(predictionIds);
+        Map<Long, PredictionScoreCountDto> predictionScoreCountMap = predictionScoreCountDtoList.stream()
+                .collect(Collectors.toMap(PredictionScoreCountDto::getPredictionId, dto -> dto));
+
         List<PredictionDto> predictionDtoList = predictionEntityPage.stream()
-                .map(PredictionMapper::toDto)
+                .map(entity -> PredictionMapper.toDto(entity, predictionScoreCountMap))
                 .toList();
 
         return ResponseGetUserPredictions.builder()

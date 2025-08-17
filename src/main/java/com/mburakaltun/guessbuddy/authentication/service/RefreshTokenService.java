@@ -5,7 +5,7 @@ import com.mburakaltun.guessbuddy.authentication.model.entity.UserEntity;
 import com.mburakaltun.guessbuddy.authentication.model.enums.AuthenticationErrorCode;
 import com.mburakaltun.guessbuddy.authentication.repository.RefreshTokenJpaRepository;
 import com.mburakaltun.guessbuddy.common.exception.AppException;
-import com.mburakaltun.guessbuddy.common.util.JwtUtility;
+import com.mburakaltun.guessbuddy.common.service.JwtService;
 import com.mburakaltun.guessbuddy.user.repository.UserJpaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -22,14 +21,15 @@ public class RefreshTokenService {
 
     private final RefreshTokenJpaRepository refreshTokenJpaRepository;
     private final UserJpaRepository userJpaRepository;
+    private final JwtService jwtService;
 
     @Transactional
     public RefreshTokenEntity createRefreshToken(Long userId) throws AppException {
         UserEntity userEntity = userJpaRepository.findById(userId)
                 .orElseThrow(() -> new AppException(AuthenticationErrorCode.USER_NOT_FOUND));
 
-        String token = JwtUtility.generateRefreshToken();
-        LocalDateTime expiryDate = JwtUtility.calculateRefreshTokenExpiryDate();
+        String token = jwtService.generateRefreshToken();
+        LocalDateTime expiryDate = jwtService.calculateRefreshTokenExpiryDate();
 
         RefreshTokenEntity refreshTokenEntity = new RefreshTokenEntity();
         refreshTokenEntity.setToken(token);
@@ -39,6 +39,7 @@ public class RefreshTokenService {
         return refreshTokenJpaRepository.save(refreshTokenEntity);
     }
 
+    @Transactional
     public RefreshTokenEntity validateRefreshToken(String token) throws AppException {
         RefreshTokenEntity refreshTokenEntity = refreshTokenJpaRepository.findByToken(token)
                 .orElseThrow(() -> new AppException(AuthenticationErrorCode.INVALID_REFRESH_TOKEN));

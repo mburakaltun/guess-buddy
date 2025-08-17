@@ -77,6 +77,14 @@ authentication:
     - /authentication/refresh-token
   password-reset-token-expiration-minutes: 15
 
+jwt:
+  secret-key: ${JWT_SECRET_KEY}
+  access-token:
+    standard-user-expiration-minutes: 60
+    admin-expiration-minutes: 720
+  refresh-token:
+    expiration-days: 1
+
 management:
   endpoints:
     web:

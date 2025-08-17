@@ -120,38 +120,31 @@ public class RoomService {
         }
 
         List<PredictionEntity> predictionEntityList = predictionJpaRepository.findByCreatorUserIdAndRoomId(userId, roomId);
-        predictionEntityList
-                .forEach(predictionEntity -> {
-                    predictionEntity.setStatus(Status.DELETED);
-                    predictionJpaRepository.save(predictionEntity);
-                });
+        predictionEntityList.forEach(predictionEntity -> predictionEntity.setStatus(Status.DELETED));
+        predictionJpaRepository.saveAll(predictionEntityList);
 
         List<Long> predictionIds = predictionEntityList.stream()
                 .map(PredictionEntity::getId)
                 .toList();
 
         List<VoteEntity> voteEntityList = voteJpaRepository.findByPredictionIdIn(predictionIds);
-        voteEntityList
-                .forEach(voteEntity -> {
-                    voteEntity.setStatus(Status.DELETED);
-                    voteJpaRepository.save(voteEntity);
-                });
+        voteEntityList.forEach(voteEntity -> voteEntity.setStatus(Status.DELETED));
+        voteJpaRepository.saveAll(voteEntityList);
 
         List<VoteEntity> userVotes = voteJpaRepository.findByVoterUserIdAndRoomId(userId, roomId);
-        userVotes
-                .forEach(voteEntity -> {
-                    voteEntity.setStatus(Status.DELETED);
-                    voteJpaRepository.save(voteEntity);
-                });
+        userVotes.forEach(voteEntity -> voteEntity.setStatus(Status.DELETED));
+        voteJpaRepository.saveAll(userVotes);
 
         roomEntity.getUsers().remove(user);
         roomJpaRepository.save(roomEntity);
 
         return ResponseLeaveRoom.builder()
                 .isAlreadyLeft(false)
+                .roomId(roomId)
                 .build();
     }
 
+    @Transactional
     public ResponseCloseRoom closeRoom(RequestCloseRoom requestCloseRoom, Long userId, Long roomId) throws AppException {
         RoomEntity roomEntity = roomJpaRepository.findById(roomId)
                 .orElseThrow(() -> new AppException(RoomErrorCode.ROOM_NOT_FOUND));
@@ -160,10 +153,12 @@ public class RoomService {
             throw new AppException(RoomErrorCode.NOT_ROOM_CREATOR);
         }
 
+        roomEntity.getUsers().clear();
         roomEntity.setStatus(Status.DELETED);
         roomJpaRepository.save(roomEntity);
 
         return ResponseCloseRoom.builder()
+                .success(true)
                 .build();
     }
 
@@ -194,7 +189,7 @@ public class RoomService {
     }
 
     private String generateSixDigitPasscode() {
-        int passcode = 1000 + secureRandom.nextInt(9000);
+        int passcode = 100000 + secureRandom.nextInt(900000);
         return String.valueOf(passcode);
     }
 }

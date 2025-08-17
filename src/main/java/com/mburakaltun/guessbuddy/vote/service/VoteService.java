@@ -2,9 +2,7 @@ package com.mburakaltun.guessbuddy.vote.service;
 
 import com.mburakaltun.guessbuddy.common.exception.AppException;
 import com.mburakaltun.guessbuddy.prediction.constants.PredictionCacheNames;
-import com.mburakaltun.guessbuddy.prediction.model.entity.PredictionEntity;
-import com.mburakaltun.guessbuddy.prediction.model.enums.PredictionErrorCode;
-import com.mburakaltun.guessbuddy.prediction.repository.PredictionJpaRepository;
+import com.mburakaltun.guessbuddy.prediction.model.dto.PredictionScoreCountDto;
 import com.mburakaltun.guessbuddy.vote.model.entity.VoteEntity;
 import com.mburakaltun.guessbuddy.vote.model.request.RequestVotePrediction;
 import com.mburakaltun.guessbuddy.vote.repository.VoteJpaRepository;
@@ -21,22 +19,18 @@ import java.util.Optional;
 public class VoteService {
 
     private final VoteJpaRepository voteJpaRepository;
-    private final PredictionJpaRepository predictionJpaRepository;
 
     @Transactional
     @CacheEvict(cacheNames = {PredictionCacheNames.PREDICTIONS, PredictionCacheNames.USER_PREDICTIONS, PredictionCacheNames.PREDICTION_RATES}, allEntries = true)
     public ResponseVotePrediction createVote(RequestVotePrediction requestVotePrediction, Long userId, Long roomId) throws AppException {
-        PredictionEntity predictionEntity = predictionJpaRepository.findById(requestVotePrediction.getPredictionId())
-                .orElseThrow(() -> new AppException(PredictionErrorCode.PREDICTION_NOT_FOUND));
+        Long predictionId = requestVotePrediction.getPredictionId();
 
-        Optional<VoteEntity> existingVoteOptional = voteJpaRepository.findByPredictionIdAndVoterUserId(requestVotePrediction.getPredictionId(), userId);
+        Optional<VoteEntity> existingVoteOptional = voteJpaRepository.findByPredictionIdAndVoterUserId(predictionId, userId);
+
         if (existingVoteOptional.isPresent()) {
             VoteEntity existingVoteEntity = existingVoteOptional.get();
-            int oldScore = existingVoteEntity.getScore();
             existingVoteEntity.setScore(requestVotePrediction.getScore());
             voteJpaRepository.save(existingVoteEntity);
-
-            predictionEntity.setTotalScore(predictionEntity.getTotalScore() - oldScore + requestVotePrediction.getScore());
         } else {
             VoteEntity voteEntity = new VoteEntity();
             voteEntity.setPredictionId(requestVotePrediction.getPredictionId());
@@ -44,21 +38,14 @@ public class VoteService {
             voteEntity.setRoomId(roomId);
             voteEntity.setScore(requestVotePrediction.getScore());
             voteJpaRepository.save(voteEntity);
-
-            predictionEntity.setVoteCount(predictionEntity.getVoteCount() + 1);
-            predictionEntity.setTotalScore(predictionEntity.getTotalScore() + requestVotePrediction.getScore());
         }
 
-        predictionJpaRepository.save(predictionEntity);
+        PredictionScoreCountDto predictionScoreCountDto = voteJpaRepository.findScoreCountByPredictionId(predictionId);
 
         return ResponseVotePrediction.builder()
                 .isVotedSuccessfully(true)
-                .averageScore(getAverageScore(predictionEntity))
-                .voteCount(predictionEntity.getVoteCount())
+                .averageScore(predictionScoreCountDto.getAverageScore())
+                .voteCount(predictionScoreCountDto.getVoteCount())
                 .build();
-    }
-
-    private double getAverageScore(PredictionEntity predictionEntity) {
-        return (double) predictionEntity.getTotalScore() / predictionEntity.getVoteCount();
     }
 }

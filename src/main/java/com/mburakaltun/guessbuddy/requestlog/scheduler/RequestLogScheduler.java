@@ -1,9 +1,9 @@
-package com.mburakaltun.guessbuddy.common.scheduler;
+package com.mburakaltun.guessbuddy.requestlog.scheduler;
 
-import com.mburakaltun.guessbuddy.common.model.entity.RequestLogEntity;
-import com.mburakaltun.guessbuddy.common.model.entity.RequestLogHistoryEntity;
-import com.mburakaltun.guessbuddy.common.repository.RequestLogHistoryRepository;
-import com.mburakaltun.guessbuddy.common.repository.RequestLogRepository;
+import com.mburakaltun.guessbuddy.requestlog.model.entity.RequestLogEntity;
+import com.mburakaltun.guessbuddy.requestlog.model.entity.RequestLogHistoryEntity;
+import com.mburakaltun.guessbuddy.requestlog.repository.RequestLogHistoryRepository;
+import com.mburakaltun.guessbuddy.requestlog.repository.RequestLogRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;

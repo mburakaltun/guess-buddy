@@ -1,9 +1,9 @@
-package com.mburakaltun.guessbuddy.common.filter;
+package com.mburakaltun.guessbuddy.requestlog.filter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mburakaltun.guessbuddy.common.model.request.CreateRequestLogRequest;
-import com.mburakaltun.guessbuddy.common.service.RequestLogService;
+import com.mburakaltun.guessbuddy.requestlog.model.request.CreateRequestLogRequest;
+import com.mburakaltun.guessbuddy.requestlog.service.RequestLogService;
 import com.mburakaltun.guessbuddy.common.util.StringUtility;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

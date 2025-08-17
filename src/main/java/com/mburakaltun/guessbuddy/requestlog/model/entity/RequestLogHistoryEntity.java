@@ -1,16 +1,23 @@
-package com.mburakaltun.guessbuddy.common.model.entity;
+package com.mburakaltun.guessbuddy.requestlog.model.entity;
 
+import com.mburakaltun.guessbuddy.common.model.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @Getter
 @Setter
 @Entity
-@Table(name = "request_log")
-public class RequestLogEntity extends BaseEntity {
+@NoArgsConstructor
+@AllArgsConstructor
+@SuperBuilder
+@Table(name = "request_log_history")
+public class RequestLogHistoryEntity extends BaseEntity {
     private Long responseTime;
     private Integer responseStatus;
     private String requestMethod;

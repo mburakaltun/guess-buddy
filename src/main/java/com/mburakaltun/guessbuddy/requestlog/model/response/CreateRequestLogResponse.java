@@ -1,4 +1,4 @@
-package com.mburakaltun.guessbuddy.common.model.response;
+package com.mburakaltun.guessbuddy.requestlog.model.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

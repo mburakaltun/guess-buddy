@@ -1,9 +1,9 @@
-package com.mburakaltun.guessbuddy.common.service;
+package com.mburakaltun.guessbuddy.requestlog.service;
 
-import com.mburakaltun.guessbuddy.common.model.entity.RequestLogEntity;
-import com.mburakaltun.guessbuddy.common.model.request.CreateRequestLogRequest;
-import com.mburakaltun.guessbuddy.common.model.response.CreateRequestLogResponse;
-import com.mburakaltun.guessbuddy.common.repository.RequestLogRepository;
+import com.mburakaltun.guessbuddy.requestlog.model.entity.RequestLogEntity;
+import com.mburakaltun.guessbuddy.requestlog.model.request.CreateRequestLogRequest;
+import com.mburakaltun.guessbuddy.requestlog.model.response.CreateRequestLogResponse;
+import com.mburakaltun.guessbuddy.requestlog.repository.RequestLogRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;

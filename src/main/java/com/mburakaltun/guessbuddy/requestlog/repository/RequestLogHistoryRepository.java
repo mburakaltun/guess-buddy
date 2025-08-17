@@ -1,6 +1,6 @@
-package com.mburakaltun.guessbuddy.common.repository;
+package com.mburakaltun.guessbuddy.requestlog.repository;
 
-import com.mburakaltun.guessbuddy.common.model.entity.RequestLogHistoryEntity;
+import com.mburakaltun.guessbuddy.requestlog.model.entity.RequestLogHistoryEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

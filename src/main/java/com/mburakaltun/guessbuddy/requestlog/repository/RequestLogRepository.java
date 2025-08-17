@@ -1,6 +1,6 @@
-package com.mburakaltun.guessbuddy.common.repository;
+package com.mburakaltun.guessbuddy.requestlog.repository;
 
-import com.mburakaltun.guessbuddy.common.model.entity.RequestLogEntity;
+import com.mburakaltun.guessbuddy.requestlog.model.entity.RequestLogEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface RequestLogRepository extends JpaRepository<RequestLogEntity, Long> {

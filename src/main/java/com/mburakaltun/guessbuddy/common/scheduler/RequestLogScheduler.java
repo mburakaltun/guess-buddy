@@ -13,10 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Scheduler for moving request logs to the history table at the end of each day.
- * This helps to keep the main request_log table small and performant.
- */
 @Slf4j
 @Component
 @RequiredArgsConstructor

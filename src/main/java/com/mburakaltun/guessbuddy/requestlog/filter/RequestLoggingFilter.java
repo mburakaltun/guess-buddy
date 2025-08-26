@@ -40,8 +40,8 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
             filterChain.doFilter(wrappedRequest, wrappedResponse);
         } finally {
             String requestHeaders = getHeaders(wrappedRequest);
-            String requestBody = getRequestBody(wrappedRequest);
-            String responseBody = getResponseBody(wrappedResponse);
+            String requestBody = getBody(wrappedRequest.getContentAsByteArray());
+            String responseBody = getBody(wrappedResponse.getContentAsByteArray());
 
             wrappedResponse.copyBodyToResponse();
 
@@ -66,23 +66,20 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
         requestLogService.createRequestLog(createRequestLogRequest);
     }
 
-    private String getRequestBody(ContentCachingRequestWrapper request) {
-        byte[] content = request.getContentAsByteArray();
-        return formatBody(content);
+    public String getBody(byte[] content) {
+        if (content == null || content.length == 0) {
+            return StringUtility.EMPTY;
+        }
+        String body = new String(content, StandardCharsets.UTF_8);
+        return body.replaceAll("\\s+", " ").trim();
     }
 
-    private String getResponseBody(ContentCachingResponseWrapper response) {
-        byte[] content = response.getContentAsByteArray();
-        return formatBody(content);
-    }
-
-    private String getHeaders(HttpServletRequest request) {
+    public String getHeaders(HttpServletRequest request) {
         Map<String, String> headers = new HashMap<>();
-        Collections.list(request.getHeaderNames()).forEach(headerName -> headers.put(headerName, request.getHeader(headerName)));
-
+        Collections.list(request.getHeaderNames())
+                .forEach(headerName -> headers.put(headerName, request.getHeader(headerName)));
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            return objectMapper.writeValueAsString(headers);
+            return new ObjectMapper().writeValueAsString(headers);
         } catch (JsonProcessingException e) {
             return "{}";
         }

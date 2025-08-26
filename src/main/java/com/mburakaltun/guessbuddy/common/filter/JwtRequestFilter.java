@@ -1,5 +1,7 @@
 package com.mburakaltun.guessbuddy.common.filter;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mburakaltun.guessbuddy.common.exception.FilterExceptionHandler;
 import com.mburakaltun.guessbuddy.common.service.JwtService;
 import com.mburakaltun.guessbuddy.authentication.properties.AuthenticationProperties;
@@ -27,7 +29,10 @@ import org.springframework.web.util.ContentCachingResponseWrapper;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 @Order(2)
 @Slf4j
@@ -90,14 +95,22 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         wrappedResponse.copyBodyToResponse();
     }
 
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String requestURI = request.getRequestURI();
+        return authenticationProperties.getWhitelistedEndpoints().stream().anyMatch(requestURI::contains);
+    }
+
     private void createRequestLog(ContentCachingRequestWrapper request, ContentCachingResponseWrapper response, int responseStatus, long duration) {
-        String requestBody = getCachedBody(request.getContentAsByteArray());
-        String responseBody = getCachedBody(response.getContentAsByteArray());
+        String requestBody = getBody(request.getContentAsByteArray());
+        String responseBody = getBody(response.getContentAsByteArray());
+        String requestHeaders = getHeaders(request);
 
         CreateRequestLogRequest createRequestLogRequest = CreateRequestLogRequest.builder()
                 .requestUrl(request.getRequestURI())
                 .requestMethod(request.getMethod())
                 .requestIp(request.getRemoteAddr())
+                .requestHeaders(requestHeaders)
                 .requestPayload(requestBody)
                 .responsePayload(responseBody)
                 .responseStatus(responseStatus)
@@ -113,12 +126,23 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         }
     }
 
-    private String getCachedBody(byte[] content) {
+    public String getBody(byte[] content) {
         if (content == null || content.length == 0) {
             return StringUtility.EMPTY;
         }
         String body = new String(content, StandardCharsets.UTF_8);
-        return body.replaceAll("\\s+", " ");
+        return body.replaceAll("\\s+", " ").trim();
+    }
+
+    public String getHeaders(HttpServletRequest request) {
+        Map<String, String> headers = new HashMap<>();
+        Collections.list(request.getHeaderNames())
+                .forEach(headerName -> headers.put(headerName, request.getHeader(headerName)));
+        try {
+            return new ObjectMapper().writeValueAsString(headers);
+        } catch (JsonProcessingException e) {
+            return "{}";
+        }
     }
 
     private boolean handleAuthentication(HttpServletRequest request, String token, String username) {
@@ -136,11 +160,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         return false;
     }
 
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-        String requestURI = request.getRequestURI();
-        return authenticationProperties.getWhitelistedEndpoints().stream().anyMatch(requestURI::contains);
-    }
 
     private String getTokenFromRequest(HttpServletRequest request) {
         String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
